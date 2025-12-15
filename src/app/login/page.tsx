@@ -117,12 +117,12 @@ export default function LoginPage() {
                     </Button>
 
                     <Grid container>
-                        <Grid item xs>
+                        <Grid size="grow">
                             <Link href="#" variant="body2">
                                 Forgot password?
                             </Link>
                         </Grid>
-                        <Grid item>
+                        <Grid>
                             <Link href="#" variant="body2">
                                 {"Don't have an account? Sign Up"}
                             </Link>
