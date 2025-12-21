@@ -218,207 +218,209 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <Card>
-        <CardHeader className="text-center pb-3 md:pb-6">
-          <CardTitle className="text-lg md:text-2xl">איך אתה מרגיש היום?</CardTitle>
-          <CardDescription className="text-sm">עקוב אחר מצב הרוח, האנרגיה והלחץ שלך</CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 md:px-6">
-          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-6">
-            <div className="space-y-3 md:space-y-4">
-              <div className="space-y-1.5 md:space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <Label className="text-base md:text-lg">מצב רוח {getMoodEmoji(moodLevel[0])}</Label>
-                  <span className="text-xl md:text-2xl font-bold">{moodLevel[0]}/10</span>
+    <div className="flex items-start justify-center w-full px-4 py-4 md:py-6">
+      <div className="w-full max-w-3xl">
+        <Card>
+          <CardHeader className="text-center pb-2 md:pb-4">
+            <CardTitle className="text-lg md:text-xl">איך אתה מרגיש היום?</CardTitle>
+            <CardDescription className="text-xs md:text-sm">עקוב אחר מצב הרוח, האנרגיה והלחץ שלך</CardDescription>
+          </CardHeader>
+          <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+            <form onSubmit={handleSubmit} className="space-y-2.5 md:space-y-4">
+              <div className="space-y-2.5 md:space-y-3">
+                <div className="space-y-1 md:space-y-1.5">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">מצב רוח {getMoodEmoji(moodLevel[0])}</Label>
+                    <span className="text-lg md:text-xl font-bold">{moodLevel[0]}/10</span>
+                  </div>
+                  <Slider value={moodLevel} onValueChange={setMoodLevel} min={1} max={10} step={1} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>שמח</span>
+                    <span>עצוב</span>
+                  </div>
                 </div>
-                <Slider value={moodLevel} onValueChange={setMoodLevel} min={1} max={10} step={1} className="w-full" />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>שמח</span>
-                  <span>עצוב</span>
-                </div>
-              </div>
 
-              <div className="space-y-1.5 md:space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <Label className="text-base md:text-lg">רמת אנרגיה {getEnergyEmoji(energyLevel[0])}</Label>
-                  <span className="text-xl md:text-2xl font-bold">{energyLevel[0]}/10</span>
-                </div>
-                <Slider
-                  value={energyLevel}
-                  onValueChange={setEnergyLevel}
-                  min={1}
-                  max={10}
-                  step={1}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>מלא אנרגיה</span>
-                  <span>מותש</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 md:space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <Label className="text-base md:text-lg">רמת לחץ {getStressEmoji(stressLevel[0])}</Label>
-                  <span className="text-xl md:text-2xl font-bold">{stressLevel[0]}/10</span>
-                </div>
-                <Slider
-                  value={stressLevel}
-                  onValueChange={setStressLevel}
-                  min={1}
-                  max={10}
-                  step={1}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>מלחיץ</span>
-                  <span>רגוע</span>
-                </div>
-              </div>
-
-              {customSliders.map((slider) => (
-                <div key={slider.id} className="space-y-1.5 md:space-y-2 border-t pt-2 md:pt-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center justify-center gap-2 flex-1">
-                      <Label className="text-base md:text-lg">
-                        {slider.name} {slider.emoji}
-                      </Label>
-                      <span className="text-xl md:text-2xl font-bold">{slider.value}/10</span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeCustomSlider(slider.id)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                <div className="space-y-1 md:space-y-1.5">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">רמת אנרגיה {getEnergyEmoji(energyLevel[0])}</Label>
+                    <span className="text-lg md:text-xl font-bold">{energyLevel[0]}/10</span>
                   </div>
                   <Slider
-                    value={[slider.value]}
-                    onValueChange={(value) => updateSliderValue(slider.id, value)}
+                    value={energyLevel}
+                    onValueChange={setEnergyLevel}
                     min={1}
                     max={10}
                     step={1}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{slider.highLabel}</span>
-                    <span>{slider.lowLabel}</span>
+                    <span>מלא אנרגיה</span>
+                    <span>מותש</span>
                   </div>
                 </div>
-              ))}
 
-              {customSliders.length < 10 && (
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" className="w-full bg-transparent text-sm md:text-base">
-                      <Plus className="ml-2 h-4 w-4" />
-                      הוסף מדד נוסף ({customSliders.length}/10)
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader className="text-center">
-                      <DialogTitle className="text-center">הוסף מדד למעקב</DialogTitle>
-                      <DialogDescription className="text-center">בחר מפריסט או צור מדד משלך</DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className="text-center block w-full">בחר מדד מוכן</Label>
-                        <Select value={selectedPreset} onValueChange={setSelectedPreset}>
-                          <SelectTrigger className="text-center">
-                            <SelectValue placeholder="בחר מדד..." />
-                          </SelectTrigger>
-                          <SelectContent className="text-center">
-                            {PRESET_SLIDERS.map((preset) => (
-                              <SelectItem key={preset.name} value={preset.name} className="justify-center">
-                                <span className="flex items-center gap-2">
-                                  {preset.emoji} {preset.name}
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {selectedPreset && (
-                          <Button type="button" onClick={addPresetSlider} className="w-full">
-                            הוסף "{selectedPreset}"
-                          </Button>
-                        )}
+                <div className="space-y-1 md:space-y-1.5">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">רמת לחץ {getStressEmoji(stressLevel[0])}</Label>
+                    <span className="text-lg md:text-xl font-bold">{stressLevel[0]}/10</span>
+                  </div>
+                  <Slider
+                    value={stressLevel}
+                    onValueChange={setStressLevel}
+                    min={1}
+                    max={10}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>מלחיץ</span>
+                    <span>רגוע</span>
+                  </div>
+                </div>
+
+                {customSliders.map((slider) => (
+                  <div key={slider.id} className="space-y-1 md:space-y-1.5 border-t pt-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-center gap-2 flex-1">
+                        <Label className="text-sm md:text-base">
+                          {slider.name} {slider.emoji}
+                        </Label>
+                        <span className="text-lg md:text-xl font-bold">{slider.value}/10</span>
                       </div>
-
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <span className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                          <span className="bg-background px-2 text-muted-foreground">או</span>
-                        </div>
-                      </div>
-
-                      <Accordion type="single" collapsible>
-                        <AccordionItem value="custom-metric">
-                          <AccordionTrigger className="text-center justify-center">צור מדד משלך</AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-2 pt-2">
-                              <input
-                                placeholder="שם המדד (לדוגמא: כאב ראש)"
-                                value={newSliderName}
-                                onChange={(e) => setNewSliderName(e.target.value)}
-                                className="w-full px-4 py-2 border rounded text-center"
-                              />
-                              <input
-                                placeholder="תווית ערך גבוה (לדוגמא: כאב חזק)"
-                                value={newSliderHighLabel}
-                                onChange={(e) => setNewSliderHighLabel(e.target.value)}
-                                className="w-full px-4 py-2 border rounded text-center"
-                              />
-                              <input
-                                placeholder="תווית ערך נמוך (לדוגמא: ללא כאב)"
-                                value={newSliderLowLabel}
-                                onChange={(e) => setNewSliderLowLabel(e.target.value)}
-                                className="w-full px-4 py-2 border rounded text-center"
-                              />
-                              <input
-                                placeholder="אימוג'י (לדוגמא: 🤕)"
-                                value={newSliderEmoji}
-                                onChange={(e) => setNewSliderEmoji(e.target.value)}
-                                maxLength={2}
-                                className="w-full px-4 py-2 border rounded text-center"
-                              />
-                              <Button type="button" onClick={addCustomSlider} className="w-full">
-                                הוסף מדד מותאם אישית
-                              </Button>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeCustomSlider(slider.id)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </DialogContent>
-                </Dialog>
-              )}
+                    <Slider
+                      value={[slider.value]}
+                      onValueChange={(value) => updateSliderValue(slider.id, value)}
+                      min={1}
+                      max={10}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{slider.highLabel}</span>
+                      <span>{slider.lowLabel}</span>
+                    </div>
+                  </div>
+                ))}
 
-              <div className="space-y-1.5 md:space-y-2">
-                <Label htmlFor="notes" className="block text-center text-base md:text-lg">
-                  הערות (אופציונלי)
-                </Label>
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="רשום איך אתה מרגיש, מה קרה היום..."
-                  className="min-h-[80px] md:min-h-[150px] resize-none w-full px-4 py-2 border rounded text-sm md:text-base"
-                />
+                {customSliders.length < 10 && (
+                  <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline" className="w-full bg-transparent text-xs md:text-sm">
+                        <Plus className="ml-2 h-3 w-3 md:h-4 md:w-4" />
+                        הוסף מדד נוסף ({customSliders.length}/10)
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader className="text-center">
+                        <DialogTitle className="text-center">הוסף מדד למעקב</DialogTitle>
+                        <DialogDescription className="text-center">בחר מפריסט או צור מדד משלך</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-center block w-full">בחר מדד מוכן</Label>
+                          <Select value={selectedPreset} onValueChange={setSelectedPreset}>
+                            <SelectTrigger className="text-center">
+                              <SelectValue placeholder="בחר מדד..." />
+                            </SelectTrigger>
+                            <SelectContent className="text-center">
+                              {PRESET_SLIDERS.map((preset) => (
+                                <SelectItem key={preset.name} value={preset.name} className="justify-center">
+                                  <span className="flex items-center gap-2">
+                                    {preset.emoji} {preset.name}
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {selectedPreset && (
+                            <Button type="button" onClick={addPresetSlider} className="w-full">
+                              הוסף "{selectedPreset}"
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">או</span>
+                          </div>
+                        </div>
+
+                        <Accordion type="single" collapsible>
+                          <AccordionItem value="custom-metric">
+                            <AccordionTrigger className="text-center justify-center">צור מדד משלך</AccordionTrigger>
+                            <AccordionContent>
+                              <div className="space-y-2 pt-2">
+                                <input
+                                  placeholder="שם המדד (לדוגמא: כאב ראש)"
+                                  value={newSliderName}
+                                  onChange={(e) => setNewSliderName(e.target.value)}
+                                  className="w-full px-4 py-2 border rounded text-center"
+                                />
+                                <input
+                                  placeholder="תווית ערך גבוה (לדוגמא: כאב חזק)"
+                                  value={newSliderHighLabel}
+                                  onChange={(e) => setNewSliderHighLabel(e.target.value)}
+                                  className="w-full px-4 py-2 border rounded text-center"
+                                />
+                                <input
+                                  placeholder="תווית ערך נמוך (לדוגמא: ללא כאב)"
+                                  value={newSliderLowLabel}
+                                  onChange={(e) => setNewSliderLowLabel(e.target.value)}
+                                  className="w-full px-4 py-2 border rounded text-center"
+                                />
+                                <input
+                                  placeholder="אימוג'י (לדוגמא: 🤕)"
+                                  value={newSliderEmoji}
+                                  onChange={(e) => setNewSliderEmoji(e.target.value)}
+                                  maxLength={2}
+                                  className="w-full px-4 py-2 border rounded text-center"
+                                />
+                                <Button type="button" onClick={addCustomSlider} className="w-full">
+                                  הוסף מדד מותאם אישית
+                                </Button>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+
+                <div className="space-y-1 md:space-y-1.5">
+                  <Label htmlFor="notes" className="block text-center text-sm md:text-base">
+                    הערות (אופציונלי)
+                  </Label>
+                  <Textarea
+                    id="notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="רשום איך אתה מרגיש, מה קרה היום..."
+                    className="min-h-[60px] md:min-h-[80px] resize-none w-full px-4 py-2 border rounded text-sm"
+                  />
+                </div>
               </div>
-            </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "שומר..." : "שמור מצב רוח"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <Button type="submit" className="w-full text-sm md:text-base" disabled={isSubmitting}>
+                {isSubmitting ? "שומר..." : "שמור מצב רוח"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

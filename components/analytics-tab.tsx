@@ -238,33 +238,6 @@ export function AnalyticsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-center gap-2">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  בחר תקופה
-                </CardTitle>
-                <CardDescription>השווה נתונים לפי תקופות זמן</CardDescription>
-              </div>
-              <Select value={period} onValueChange={(v) => setPeriod(v as any)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7">7 ימים אחרונים</SelectItem>
-                  <SelectItem value="14">14 ימים אחרונים</SelectItem>
-                  <SelectItem value="30">30 ימים אחרונים</SelectItem>
-                  <SelectItem value="all">כל הזמן</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-        </Card>
-      </div>
-
       <div className="grid gap-4 md:grid-cols-5">
         <Card className="border-t-4 border-t-teal-500 md:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -327,6 +300,38 @@ export function AnalyticsTab() {
           </>
         )}
       </div>
+
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="period-selector">
+          <Card className="border-2 border-primary/20">
+            <AccordionTrigger className="hover:no-underline [&[data-state=open]>div>svg]:rotate-180">
+              <CardHeader className="text-center w-full py-4">
+                <CardTitle className="text-xl flex items-center justify-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  בחר תקופה
+                  <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+                </CardTitle>
+                <CardDescription>השווה נתונים לפי תקופות זמן</CardDescription>
+              </CardHeader>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="flex justify-center py-4">
+                <Select value={period} onValueChange={(v) => setPeriod(v as any)}>
+                  <SelectTrigger className="w-[240px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 ימים אחרונים</SelectItem>
+                    <SelectItem value="14">14 ימים אחרונים</SelectItem>
+                    <SelectItem value="30">30 ימים אחרונים</SelectItem>
+                    <SelectItem value="all">כל הזמן</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </AccordionContent>
+          </Card>
+        </AccordionItem>
+      </Accordion>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* מעקב מצב רוח לאורך זמן */}
@@ -839,280 +844,6 @@ export function AnalyticsTab() {
           })}
         </div>
       )}
-
-      {/* The following sections were duplicated and are now removed as per the update. */}
-      {/* <div className="grid gap-6 md:grid-cols-2"> */}
-      {/* מעקב מצב רוח לאורך זמן */}
-      {/* <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl flex items-center justify-center gap-2">מעקב מצב רוח לאורך זמן</CardTitle>
-            <CardDescription>מצב רוח בלבד</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full overflow-hidden">
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(180, 70%, 50%)" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="hsl(180, 70%, 50%)" stopOpacity={0.1} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis dataKey="date" />
-                    <YAxis domain={[0, 10]} />
-                    <Tooltip
-                      cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "5 5" }}
-                      position={{ y: -80 }}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const value = payload[0].value
-                          return (
-                            <div className="rounded-lg border bg-background/95 backdrop-blur-sm px-3 py-2 shadow-xl">
-                              <span className="text-2xl font-bold text-cyan-500">{value}</span>
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="mood"
-                      stroke="hsl(180, 70%, 50%)"
-                      strokeWidth={3}
-                      fill="url(#colorMood)"
-                      dot={{ fill: "hsl(180, 70%, 50%)", strokeWidth: 2, r: 5, stroke: "#fff" }}
-                      activeDot={{ r: 8, strokeWidth: 2 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            {summaryStats && (
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 space-y-2">
-                <h4 className="font-semibold text-center mb-3">נתונים משוקללים לתקופה</h4>
-                <div className="text-center">
-                  <span className="text-muted-foreground">מצב רוח ממוצע:</span>
-                  <p className="text-2xl font-bold text-cyan-500">{summaryStats.avgMood}</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl flex items-center justify-center gap-2">
-              שיכלול כולל - מעקב לאורך זמן
-            </CardTitle>
-            <CardDescription>ממוצע של כל המדדים ביחד</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full overflow-hidden">
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorOverall" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(180, 70%, 50%)" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="hsl(180, 70%, 50%)" stopOpacity={0.1} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis dataKey="date" />
-                    <YAxis domain={[0, 10]} />
-                    <Tooltip
-                      cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "5 5" }}
-                      position={{ y: -80 }}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const value = payload[0].value
-                          return (
-                            <div className="rounded-lg border bg-background/95 backdrop-blur-sm px-3 py-2 shadow-xl">
-                              <span className="text-2xl font-bold text-teal-500">{value}</span>
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="overall"
-                      stroke="hsl(180, 70%, 50%)"
-                      strokeWidth={3}
-                      fill="url(#colorOverall)"
-                      dot={{ fill: "hsl(180, 70%, 50%)", strokeWidth: 2, r: 5, stroke: "#fff" }}
-                      activeDot={{ r: 8, strokeWidth: 2 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            {summaryStats && (
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 space-y-2">
-                <h4 className="font-semibold text-center mb-3">נתונים משוקללים לתקופה</h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="text-center">
-                    <span className="text-muted-foreground">ציון כולל ממוצע:</span>
-                    <p className="text-2xl font-bold text-teal-500">{summaryStats.avgOverall}</p>
-                  </div>
-                  <div className="text-center">
-                    <span className="text-muted-foreground">מספר רשומות:</span>
-                    <p className="text-2xl font-bold">{summaryStats.count}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl flex items-center justify-center gap-2">השוואת מדדים</CardTitle>
-            <CardDescription>מעקב אחר כל המדדים ביחד</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full overflow-hidden">
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis dataKey="date" />
-                    <YAxis domain={[0, 10]} />
-                    <Tooltip
-                      position={{ y: -80 }}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="rounded-lg border bg-background/95 backdrop-blur-sm px-3 py-2 shadow-xl space-y-1">
-                              {payload.map((entry: any) => (
-                                <div key={entry.name} className="flex items-center gap-2">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                                  <span className="text-lg font-bold" style={{ color: entry.color }}>
-                                    {entry.value}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="mood"
-                      stroke="hsl(180, 70%, 50%)"
-                      strokeWidth={3}
-                      name="מצב רוח"
-                      dot={{ fill: "hsl(180, 70%, 50%)", strokeWidth: 2, r: 5, stroke: "#fff" }}
-                      activeDot={{ r: 8 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="energy"
-                      stroke="hsl(50, 90%, 55%)"
-                      strokeWidth={3}
-                      name="אנרגיה"
-                      dot={{ fill: "hsl(50, 90%, 55%)", strokeWidth: 2, r: 5, stroke: "#fff" }}
-                      activeDot={{ r: 8 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="stress"
-                      stroke="hsl(0, 70%, 60%)"
-                      strokeWidth={3}
-                      name="לחץ"
-                      dot={{ fill: "hsl(0, 70%, 60%)", strokeWidth: 2, r: 5, stroke: "#fff" }}
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            {summaryStats && (
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 space-y-2">
-                <h4 className="font-semibold text-center mb-3">נתונים משוקללים לתקופה</h4>
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div className="text-center">
-                    <span className="text-muted-foreground">מצב רוח:</span>
-                    <p className="text-2xl font-bold text-cyan-500">{summaryStats.avgMood}</p>
-                  </div>
-                  <div className="text-center">
-                    <span className="text-muted-foreground">אנרגיה:</span>
-                    <p className="text-2xl font-bold text-yellow-500">{summaryStats.avgEnergy}</p>
-                  </div>
-                  <div className="text-center">
-                    <span className="text-muted-foreground">לחץ:</span>
-                    <p className="text-2xl font-bold text-red-500">{summaryStats.avgStress}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {weeklyAvg && (
-          <Card>
-            <CardHeader className="text-center">
-              <CardTitle className="text-xl flex items-center justify-center gap-2">ממוצעים שבועיים</CardTitle>
-              <CardDescription>השבוע האחרון</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="w-full overflow-hidden">
-                <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={weeklyData}>
-                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                      <XAxis dataKey="week" />
-                      <YAxis domain={[0, 10]} />
-                      <Tooltip
-                        position={{ y: -80 }}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const value = payload[0].value
-                            return (
-                              <div className="rounded-lg border bg-background/95 backdrop-blur-sm px-3 py-2 shadow-xl">
-                                <span className="text-2xl font-bold text-cyan-500">{value}</span>
-                              </div>
-                            )
-                          }
-                          return null
-                        }}
-                      />
-                      <Bar dataKey="value" radius={[12, 12, 0, 0]} maxBarSize={100} fill="hsl(180, 70%, 50%)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </div>
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 space-y-2">
-                <h4 className="font-semibold text-center mb-3">נתונים משוקללים לשבוע</h4>
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div className="flex flex-col items-center gap-2 p-2 bg-cyan-500/5 rounded-md">
-                    <Heart className="h-4 w-4 text-cyan-500" />
-                    <div className="font-medium">מצב רוח</div>
-                    <div className="text-lg font-bold text-cyan-500">{weeklyAvg.mood.toFixed(1)}</div>
-                  </div>
-                  <div className="flex flex-col items-center gap-2 p-2 bg-yellow-500/5 rounded-md">
-                    <Zap className="h-4 w-4 text-yellow-500" />
-                    <div className="font-medium">אנרגיה</div>
-                    <div className="text-lg font-bold text-yellow-500">{weeklyAvg.energy.toFixed(1)}</div>
-                  </div>
-                  <div className="flex flex-col items-center gap-2 p-2 bg-red-500/5 rounded-md">
-                    <AlertCircle className="h-4 w-4 text-red-500" />
-                    <div className="font-medium">לחץ</div>
-                    <div className="text-lg font-bold text-red-500">{weeklyAvg.stress.toFixed(1)}</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div> */}
 
       {/* היסטוריה מלאה */}
       <Accordion type="single" collapsible className="w-full">

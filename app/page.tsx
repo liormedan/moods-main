@@ -11,20 +11,7 @@ export default function Page() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="hidden lg:flex lg:flex-col lg:items-center lg:justify-center bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 p-12 text-white">
-        <div className="space-y-8 text-center max-w-md">
-          <div className="flex items-center justify-center gap-3">
-            <Activity className="h-16 w-16" />
-            <h1 className="text-6xl font-bold">MOODS</h1>
-          </div>
-          <p className="text-3xl font-semibold">לניהול מצבי רוח</p>
-          <p className="text-xl leading-relaxed opacity-90">
-            עקוב אחרי מצב הרוח, האנרגיה והרווחה שלך. קבל תובנות מעמיקות על הדפוסים היומיומיים שלך ושפר את איכות החיים.
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-center p-6 lg:p-12">
+      <div className="flex items-center justify-center p-6 lg:p-12 order-2 lg:order-1">
         <div className="w-full max-w-md space-y-6">
           {/* Mobile branding */}
           <div className="lg:hidden text-center mb-8">
@@ -47,6 +34,19 @@ export default function Page() {
 
           {/* Forms */}
           {isLogin ? <LoginForm /> : <SignupForm />}
+        </div>
+      </div>
+
+      <div className="hidden lg:flex lg:flex-col lg:items-center lg:justify-center bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 p-12 text-white order-1 lg:order-2">
+        <div className="space-y-8 text-center max-w-md">
+          <div className="flex items-center justify-center gap-3">
+            <Activity className="h-16 w-16" />
+            <h1 className="text-6xl font-bold">MOODS</h1>
+          </div>
+          <p className="text-3xl font-semibold">לניהול מצבי רוח</p>
+          <p className="text-xl leading-relaxed opacity-90">
+            עקוב אחרי מצב הרוח, האנרגיה והרווחה שלך. קבל תובנות מעמיקות על הדפוסים היומיומיים שלך ושפר את איכות החיים.
+          </p>
         </div>
       </div>
     </div>
