@@ -219,18 +219,17 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
 
   return (
     <Card>
-      <CardHeader className="text-center">
-        <CardTitle>איך אתה מרגיש היום?</CardTitle>
-        <CardDescription>עקוב אחר מצב הרוח, האנרגיה והלחץ שלך</CardDescription>
+      <CardHeader className="text-center pb-3 md:pb-6">
+        <CardTitle className="text-lg md:text-2xl">איך אתה מרגיש היום?</CardTitle>
+        <CardDescription className="text-sm">עקוב אחר מצב הרוח, האנרגיה והלחץ שלך</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            {/* מצב רוח */}
-            <div className="space-y-2">
+      <CardContent className="px-3 md:px-6">
+        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-6">
+          <div className="space-y-3 md:space-y-4">
+            <div className="space-y-1.5 md:space-y-2">
               <div className="flex items-center justify-center gap-2">
-                <Label className="text-lg">מצב רוח {getMoodEmoji(moodLevel[0])}</Label>
-                <span className="text-2xl font-bold">{moodLevel[0]}/10</span>
+                <Label className="text-base md:text-lg">מצב רוח {getMoodEmoji(moodLevel[0])}</Label>
+                <span className="text-xl md:text-2xl font-bold">{moodLevel[0]}/10</span>
               </div>
               <Slider value={moodLevel} onValueChange={setMoodLevel} min={1} max={10} step={1} className="w-full" />
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -239,11 +238,10 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
               </div>
             </div>
 
-            {/* רמת אנרגיה */}
-            <div className="space-y-2">
+            <div className="space-y-1.5 md:space-y-2">
               <div className="flex items-center justify-center gap-2">
-                <Label className="text-lg">רמת אנרגיה {getEnergyEmoji(energyLevel[0])}</Label>
-                <span className="text-2xl font-bold">{energyLevel[0]}/10</span>
+                <Label className="text-base md:text-lg">רמת אנרגיה {getEnergyEmoji(energyLevel[0])}</Label>
+                <span className="text-xl md:text-2xl font-bold">{energyLevel[0]}/10</span>
               </div>
               <Slider value={energyLevel} onValueChange={setEnergyLevel} min={1} max={10} step={1} className="w-full" />
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -252,11 +250,10 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
               </div>
             </div>
 
-            {/* רמת לחץ */}
-            <div className="space-y-2">
+            <div className="space-y-1.5 md:space-y-2">
               <div className="flex items-center justify-center gap-2">
-                <Label className="text-lg">רמת לחץ {getStressEmoji(stressLevel[0])}</Label>
-                <span className="text-2xl font-bold">{stressLevel[0]}/10</span>
+                <Label className="text-base md:text-lg">רמת לחץ {getStressEmoji(stressLevel[0])}</Label>
+                <span className="text-xl md:text-2xl font-bold">{stressLevel[0]}/10</span>
               </div>
               <Slider value={stressLevel} onValueChange={setStressLevel} min={1} max={10} step={1} className="w-full" />
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -266,13 +263,13 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
             </div>
 
             {customSliders.map((slider) => (
-              <div key={slider.id} className="space-y-2 border-t pt-4">
+              <div key={slider.id} className="space-y-1.5 md:space-y-2 border-t pt-2 md:pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center justify-center gap-2 flex-1">
-                    <Label className="text-lg">
+                    <Label className="text-base md:text-lg">
                       {slider.name} {slider.emoji}
                     </Label>
-                    <span className="text-2xl font-bold">{slider.value}/10</span>
+                    <span className="text-xl md:text-2xl font-bold">{slider.value}/10</span>
                   </div>
                   <Button
                     type="button"
@@ -302,7 +299,7 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
             {customSliders.length < 10 && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button type="button" variant="outline" className="w-full bg-transparent">
+                  <Button type="button" variant="outline" className="w-full bg-transparent text-sm md:text-base">
                     <Plus className="ml-2 h-4 w-4" />
                     הוסף מדד נוסף ({customSliders.length}/10)
                   </Button>
@@ -313,7 +310,6 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <DialogDescription className="text-center">בחר מפריסט או צור מדד משלך</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
-                    {/* בחירת פריסט */}
                     <div className="space-y-2">
                       <Label className="text-center block w-full">בחר מדד מוכן</Label>
                       <Select value={selectedPreset} onValueChange={setSelectedPreset}>
@@ -346,7 +342,6 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                       </div>
                     </div>
 
-                    {/* יצירת מדד מותאם אישית */}
                     <Accordion type="single" collapsible>
                       <AccordionItem value="custom-metric">
                         <AccordionTrigger className="text-center justify-center">צור מדד משלך</AccordionTrigger>
@@ -389,9 +384,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
               </Dialog>
             )}
 
-            {/* הערות */}
-            <div className="space-y-2">
-              <Label htmlFor="notes" className="block text-center text-lg">
+            <div className="space-y-1.5 md:space-y-2">
+              <Label htmlFor="notes" className="block text-center text-base md:text-lg">
                 הערות (אופציונלי)
               </Label>
               <Textarea
@@ -399,7 +393,7 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="רשום איך אתה מרגיש, מה קרה היום..."
-                className="min-h-[150px] resize-none w-full px-4 py-2 border rounded"
+                className="min-h-[80px] md:min-h-[150px] resize-none w-full px-4 py-2 border rounded text-sm md:text-base"
               />
             </div>
           </div>
