@@ -105,6 +105,49 @@
     direction: rtl;
     text-align: right;
   }
+
+  /* Mobile-first native app styles */
+  /* Safe area support for notched devices */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Smooth scrolling for mobile */
+  html {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent text size adjustment on orientation change */
+  body {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Native app feeling - remove tap highlights */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Smooth transitions for native feel */
+  button,
+  a,
+  [role="button"] {
+    @apply transition-all duration-200 active:scale-95;
+  }
+
+  /* Mobile card spacing */
+  @media (max-width: 768px) {
+    .card {
+      @apply rounded-xl;
+    }
+  }
 }
 
 /* Adding Editor.js custom styles for dark/light theme */

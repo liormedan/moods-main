@@ -12,9 +12,25 @@ const heebo = Heebo({
 })
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
+  title: "MOODS - לניהול מצבי רוח",
+  description: "עקוב אחרי מצב הרוח שלך באופן יומי",
   generator: "v0.app",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+  },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#40B5AD" },
+    { media: "(prefers-color-scheme: dark)", color: "#40B5AD" },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "MOODS",
+  },
   icons: {
     icon: [
       {
