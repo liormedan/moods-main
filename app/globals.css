@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
+    /* Dark theme colors (default) */
+    --background: 200 30% 8%;
+    --foreground: 180 10% 95%;
+    --card: 200 25% 12%;
+    --card-foreground: 180 10% 95%;
+    --popover: 200 30% 10%;
+    --popover-foreground: 180 10% 95%;
+    --primary: 175 60% 45%;
+    --primary-foreground: 180 10% 98%;
+    --secondary: 190 30% 18%;
+    --secondary-foreground: 180 10% 95%;
+    --muted: 195 20% 20%;
+    --muted-foreground: 180 10% 65%;
+    --accent: 170 50% 35%;
+    --accent-foreground: 180 10% 98%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 190 25% 22%;
+    --input: 190 25% 22%;
+    --ring: 175 60% 50%;
+    --chart-1: 175 60% 50%;
+    --chart-2: 165 55% 45%;
+    --chart-3: 185 50% 55%;
+    --chart-4: 195 45% 60%;
+    --chart-5: 155 65% 40%;
+    --radius: 0.5rem;
+    --sidebar-background: 200 28% 10%;
+    --sidebar-foreground: 180 10% 90%;
+    --sidebar-primary: 175 60% 45%;
+    --sidebar-primary-foreground: 180 10% 98%;
+    --sidebar-accent: 190 25% 16%;
+    --sidebar-accent-foreground: 180 10% 95%;
+    --sidebar-border: 190 25% 18%;
+    --sidebar-ring: 175 60% 50%;
+  }
+
+  /* Light theme colors */
+  .light {
+    --background: 180 20% 98%;
+    /* Changed foreground text to teal-cyan for light mode */
+    --foreground: 185 70% 30%;
+    --card: 180 15% 95%;
+    /* Changed card text to darker teal */
+    --card-foreground: 190 75% 25%;
+    --popover: 180 20% 98%;
+    /* Changed popover text to teal */
+    --popover-foreground: 185 70% 30%;
+    --primary: 175 60% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 185 20% 90%;
+    /* Changed secondary text to teal-blue */
+    --secondary-foreground: 190 65% 30%;
+    --muted: 185 15% 92%;
+    /* Changed muted text to softer teal */
+    --muted-foreground: 185 50% 40%;
+    --accent: 170 50% 88%;
+    /* Changed accent text to blue-green */
+    --accent-foreground: 180 70% 28%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 185 20% 85%;
+    --input: 185 20% 85%;
+    --ring: 175 60% 45%;
+    --chart-1: 175 60% 45%;
+    --chart-2: 165 55% 50%;
+    --chart-3: 185 50% 60%;
+    --chart-4: 195 45% 65%;
+    --chart-5: 155 65% 45%;
+    --sidebar-background: 180 18% 96%;
+    /* Changed sidebar text to teal */
+    --sidebar-foreground: 185 70% 28%;
+    --sidebar-primary: 175 60% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 185 20% 92%;
+    /* Changed sidebar accent text to blue-teal */
+    --sidebar-accent-foreground: 190 65% 30%;
+    --sidebar-border: 185 20% 88%;
+    --sidebar-ring: 175 60% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* RTL support for Hebrew */
+  [dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+  }
+}
+
+/* Adding Editor.js custom styles for dark/light theme */
+@layer components {
+  /* Editor.js container styling */
+  .codex-editor {
+    @apply text-foreground;
+  }
+
+  .codex-editor__redactor {
+    @apply pb-4;
+  }
+
+  /* Editor.js blocks */
+  .ce-block__content {
+    @apply max-w-full;
+  }
+
+  .ce-paragraph {
+    @apply text-base leading-relaxed;
+  }
+
+  .ce-header {
+    @apply font-bold;
+  }
+
+  /* Editor.js toolbar */
+  .ce-toolbar__content {
+    @apply max-w-full;
+  }
+
+  .ce-toolbar__plus,
+  .ce-toolbar__settings-btn {
+    @apply text-foreground bg-card hover:bg-accent transition-colors;
+  }
+
+  /* Editor.js inline toolbar */
+  .ce-inline-toolbar {
+    @apply bg-card border border-border shadow-lg rounded-md;
+  }
+
+  .ce-inline-tool {
+    @apply text-foreground hover:bg-accent transition-colors;
+  }
+
+  /* Editor.js popover */
+  .ce-popover {
+    @apply bg-card border border-border shadow-lg rounded-md;
+  }
+
+  .ce-popover__item {
+    @apply text-foreground hover:bg-accent transition-colors;
+  }
+
+  .ce-popover__item-icon {
+    @apply bg-transparent;
+  }
+
+  /* Checklist styling */
+  .cdx-checklist__item-checkbox {
+    @apply border-2 border-primary;
+  }
+
+  .cdx-checklist__item-checkbox:checked {
+    @apply bg-primary;
+  }
+
+  .cdx-checklist__item-text {
+    @apply text-foreground;
+  }
+
+  /* List styling */
+  .cdx-list {
+    @apply text-foreground;
+  }
+
+  /* Code inline styling */
+  .ce-code {
+    @apply bg-muted text-foreground rounded px-1 py-0.5;
+  }
+
+  /* Placeholder text */
+  .ce-block--empty .ce-paragraph[data-placeholder]:empty::before {
+    @apply text-muted-foreground opacity-50;
+  }
+}
