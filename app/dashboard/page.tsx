@@ -69,9 +69,13 @@ export default function DashboardPage() {
             <h1 className="text-lg font-bold truncate">שלום, {user.email?.split("@")[0]}!</h1>
             <p className="text-xs text-muted-foreground">איך אתה מרגיש היום?</p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <ThemeToggle />
-            <UserProfileMenu email={user.email || ""} createdAt={user.created_at} onSignOut={handleSignOut} />
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="p-1.5 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors">
+              <ThemeToggle />
+            </div>
+            <div className="rounded-lg border border-border bg-card/50">
+              <UserProfileMenu email={user.email || ""} createdAt={user.created_at} onSignOut={handleSignOut} />
+            </div>
           </div>
         </div>
       </div>
@@ -223,36 +227,15 @@ export default function DashboardPage() {
       {/* Mobile Bottom Navigation - native app style */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-bottom">
         <div className="grid grid-cols-5 h-16">
-          {/* Changed the order of buttons - now from right to left: בקרה - דיווח - ניתוח - קשר - הגדרות */}
           <button
-            onClick={() => setActiveTab("settings")}
+            onClick={() => setActiveTab("overview")}
             className={cn(
               "flex flex-col items-center justify-center gap-1 transition-colors",
-              activeTab === "settings" ? "text-primary" : "text-muted-foreground",
+              activeTab === "overview" ? "text-primary" : "text-muted-foreground",
             )}
           >
-            <Settings className="w-5 h-5" />
-            <span className="text-xs font-medium">הגדרות</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("emergency")}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 transition-colors",
-              activeTab === "emergency" ? "text-primary" : "text-muted-foreground",
-            )}
-          >
-            <Phone className="w-5 h-5" />
-            <span className="text-xs font-medium">קשר</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("analytics")}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 transition-colors",
-              activeTab === "analytics" ? "text-primary" : "text-muted-foreground",
-            )}
-          >
-            <TrendingUp className="w-5 h-5" />
-            <span className="text-xs font-medium">ניתוח</span>
+            <BarChart3 className="w-5 h-5" />
+            <span className="text-xs font-medium">בקרה</span>
           </button>
           <button
             onClick={() => setActiveTab("report")}
@@ -265,14 +248,34 @@ export default function DashboardPage() {
             <span className="text-xs font-medium">דיווח</span>
           </button>
           <button
-            onClick={() => setActiveTab("overview")}
+            onClick={() => setActiveTab("analytics")}
             className={cn(
               "flex flex-col items-center justify-center gap-1 transition-colors",
-              activeTab === "overview" ? "text-primary" : "text-muted-foreground",
+              activeTab === "analytics" ? "text-primary" : "text-muted-foreground",
             )}
           >
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-xs font-medium">בקרה</span>
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-xs font-medium">ניתוח</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("emergency")}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 transition-colors",
+              activeTab === "emergency" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Phone className="w-5 h-5" />
+            <span className="text-xs font-medium">קשר</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 transition-colors",
+              activeTab === "settings" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Settings className="w-5 h-5" />
+            <span className="text-xs font-medium">הגדרות</span>
           </button>
         </div>
       </div>
