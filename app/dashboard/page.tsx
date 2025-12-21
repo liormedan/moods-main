@@ -11,11 +11,14 @@ import { EmergencyContactTab } from "@/components/emergency-contact-tab"
 import { SettingsTab } from "@/components/settings-tab"
 import { UserProfileMenu } from "@/components/user-profile-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Plus } from "lucide-react"
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("overview")
+  const [isMoodDialogOpen, setIsMoodDialogOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -79,6 +82,20 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={isMoodDialogOpen} onOpenChange={setIsMoodDialogOpen}>
+        <DialogTrigger asChild>
+          <button
+            className="md:hidden fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center safe-bottom"
+            aria-label="דווח מצב רוח"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </DialogTrigger>
+        <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] overflow-y-auto">
+          <MoodTrackerForm onSuccess={() => setIsMoodDialogOpen(false)} />
+        </DialogContent>
+      </Dialog>
 
       {/* Main Content with mobile padding */}
       <div className="pb-24 md:pb-6">

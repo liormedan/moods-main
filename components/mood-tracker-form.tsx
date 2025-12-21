@@ -30,6 +30,10 @@ interface CustomSlider {
   emoji: string
 }
 
+interface MoodTrackerFormProps {
+  onSuccess?: () => void
+}
+
 const PRESET_SLIDERS = [
   { name: "שינה", lowLabel: "ישentai מצוין", highLabel: "לא ישentai", emoji: "😴" },
   { name: "תיאבון", lowLabel: "שבע", highLabel: "רעב", emoji: "🍽️" },
@@ -40,7 +44,7 @@ const PRESET_SLIDERS = [
   { name: "חרדה", lowLabel: "רגוע", highLabel: "חרד", emoji: "😰" },
 ]
 
-export function MoodTrackerForm() {
+export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
   const [moodLevel, setMoodLevel] = useState([5])
   const [energyLevel, setEnergyLevel] = useState([5])
   const [stressLevel, setStressLevel] = useState([5])
@@ -180,6 +184,7 @@ export function MoodTrackerForm() {
         setStressLevel([5])
         setNotes("")
         setCustomSliders([])
+        onSuccess?.()
       }
     } catch (error) {
       console.error("[v0] Unexpected error:", error)
