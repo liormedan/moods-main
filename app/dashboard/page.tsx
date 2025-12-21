@@ -223,6 +223,7 @@ export default function DashboardPage() {
       {/* Mobile Bottom Navigation - native app style */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-bottom">
         <div className="grid grid-cols-5 h-16">
+          {/* Changed the order of buttons - now from right to left: בקרה - דיווח - ניתוח - קשר - הגדרות */}
           <button
             onClick={() => setActiveTab("settings")}
             className={cn(
