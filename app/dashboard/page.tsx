@@ -129,31 +129,13 @@ export default function DashboardPage() {
             <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-bottom">
               <div className="grid grid-cols-5 h-16">
                 <button
-                  onClick={() => setActiveTab("overview")}
+                  onClick={() => setActiveTab("settings")}
                   className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "overview" ? "text-primary" : "text-muted-foreground"
+                    activeTab === "settings" ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
-                  <span className="text-xl">📊</span>
-                  <span className="text-xs font-medium">בקרה</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("report")}
-                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "report" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xl">✍️</span>
-                  <span className="text-xs font-medium">דיווח</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("analytics")}
-                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "analytics" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xl">📈</span>
-                  <span className="text-xs font-medium">ניתוח</span>
+                  <span className="text-xl">⚙️</span>
+                  <span className="text-xs font-medium">הגדרות</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("emergency")}
@@ -165,13 +147,31 @@ export default function DashboardPage() {
                   <span className="text-xs font-medium">קשר</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab("settings")}
+                  onClick={() => setActiveTab("analytics")}
                   className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "settings" ? "text-primary" : "text-muted-foreground"
+                    activeTab === "analytics" ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
-                  <span className="text-xl">⚙️</span>
-                  <span className="text-xs font-medium">הגדרות</span>
+                  <span className="text-xl">📈</span>
+                  <span className="text-xs font-medium">ניתוח</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("report")}
+                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+                    activeTab === "report" ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <span className="text-xl">✍️</span>
+                  <span className="text-xs font-medium">דיווח</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("overview")}
+                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+                    activeTab === "overview" ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <span className="text-xl">📊</span>
+                  <span className="text-xs font-medium">בקרה</span>
                 </button>
               </div>
             </div>
