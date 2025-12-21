@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { MoodTrackerForm } from "@/components/mood-tracker-form"
 import { AnalyticsTab } from "@/components/analytics-tab"
@@ -12,13 +11,15 @@ import { SettingsTab } from "@/components/settings-tab"
 import { UserProfileMenu } from "@/components/user-profile-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { Plus } from "lucide-react"
+import { Plus, BarChart3, FileText, TrendingUp, Phone, Settings, ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("overview")
   const [isMoodDialogOpen, setIsMoodDialogOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -51,14 +52,22 @@ export default function DashboardPage() {
     return null
   }
 
+  const sidebarItems = [
+    { id: "overview", label: "בקרה", icon: BarChart3 },
+    { id: "report", label: "דיווח", icon: FileText },
+    { id: "analytics", label: "ניתוח", icon: TrendingUp },
+    { id: "emergency", label: "קשר", icon: Phone },
+    { id: "settings", label: "הגדרות", icon: Settings },
+  ]
+
   return (
     <div className="min-h-svh w-full bg-gradient-to-br from-background to-muted/20 overflow-x-hidden">
       {/* Mobile Header - sticky at top */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-3 py-3 md:hidden safe-top">
-        <div className="flex items-center justify-between max-w-full">
-          <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-3 max-w-full">
+          <div className="flex-1 min-w-0 text-right">
             <h1 className="text-lg font-bold truncate">שלום, {user.email?.split("@")[0]}!</h1>
-            <p className="text-xs text-muted-foreground truncate">איך אתה מרגיש היום?</p>
+            <p className="text-xs text-muted-foreground">איך אתה מרגיש היום?</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <ThemeToggle />
@@ -67,22 +76,111 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Desktop Header */}
-      <div className="hidden md:block p-6 md:p-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">שלום, {user.email?.split("@")[0]}!</h1>
-              <p className="text-muted-foreground mt-1">איך אתה מרגיש היום?</p>
-            </div>
-            <div className="flex items-center gap-3">
+      <div className="hidden md:flex min-h-screen">
+        {/* Sidebar */}
+        <aside
+          className={cn(
+            "bg-card border-r border-border flex flex-col fixed right-0 top-0 h-screen z-40 transition-all duration-300",
+            isSidebarCollapsed ? "w-20" : "w-64",
+          )}
+        >
+          {/* Sidebar Header */}
+          <div className="p-6 border-b border-border flex items-center justify-between">
+            {!isSidebarCollapsed && (
+              <div>
+                <h2 className="text-xl font-bold">MOODS</h2>
+                <p className="text-sm text-muted-foreground mt-1">ניהול מצבי רוח</p>
+              </div>
+            )}
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className={cn("p-2 rounded-lg hover:bg-muted transition-colors", isSidebarCollapsed && "mx-auto")}
+              aria-label={isSidebarCollapsed ? "פתח תפריט" : "סגור תפריט"}
+            >
+              {isSidebarCollapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Navigation Menu */}
+          <nav className="flex-1 p-4 space-y-2">
+            {sidebarItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+                  isSidebarCollapsed ? "justify-center" : "text-right",
+                  activeTab === item.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "hover:bg-muted text-muted-foreground hover:text-foreground",
+                )}
+                title={isSidebarCollapsed ? item.label : undefined}
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!isSidebarCollapsed && <span className="font-medium">{item.label}</span>}
+              </button>
+            ))}
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div
+            className={cn("p-4 border-t border-border space-y-3", isSidebarCollapsed && "flex flex-col items-center")}
+          >
+            <div className={cn("flex items-center gap-2", isSidebarCollapsed ? "justify-center" : "px-2")}>
               <ThemeToggle />
-              <UserProfileMenu email={user.email || ""} createdAt={user.created_at} onSignOut={handleSignOut} />
+            </div>
+            <div className={cn("w-full", isSidebarCollapsed && "flex justify-center")}>
+              <UserProfileMenu
+                email={user.email || ""}
+                createdAt={user.created_at}
+                onSignOut={handleSignOut}
+                compact={isSidebarCollapsed}
+              />
             </div>
           </div>
-        </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main
+          className={cn("flex-1 overflow-y-auto transition-all duration-300", isSidebarCollapsed ? "pr-20" : "pr-64")}
+        >
+          <div className="fixed top-4 left-4 z-30">
+            <UserProfileMenu email={user.email || ""} createdAt={user.created_at} onSignOut={handleSignOut} />
+          </div>
+
+          <div className="p-6 md:p-10">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-8 text-center">
+                <h1 className="text-3xl font-bold">שלום, {user.email?.split("@")[0]}!</h1>
+                <p className="text-muted-foreground mt-1">איך אתה מרגיש היום?</p>
+              </div>
+
+              {/* Content */}
+              {activeTab === "overview" && (
+                <DashboardOverview
+                  userEmail={user.email || ""}
+                  userId={user.id}
+                  onNavigateToReport={() => setActiveTab("report")}
+                />
+              )}
+
+              {activeTab === "report" && (
+                <div className="max-w-3xl">
+                  <MoodTrackerForm />
+                </div>
+              )}
+
+              {activeTab === "analytics" && <AnalyticsTab userId={user.id} />}
+
+              {activeTab === "emergency" && <EmergencyContactTab />}
+
+              {activeTab === "settings" && <SettingsTab userEmail={user.email || ""} />}
+            </div>
+          </div>
+        </main>
       </div>
 
+      {/* Mobile FAB Button */}
       <Dialog open={isMoodDialogOpen} onOpenChange={setIsMoodDialogOpen}>
         <DialogTrigger asChild>
           <button
@@ -97,111 +195,84 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Main Content with mobile padding */}
-      <div className="pb-24 md:pb-6">
-        <div className="mx-auto max-w-7xl px-3 md:px-10">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            {/* Desktop Tabs - horizontal */}
-            <TabsList className="hidden md:grid w-full grid-cols-5 mb-8" dir="ltr">
-              <TabsTrigger value="settings" className="gap-2">
-                <span className="text-lg">⚙️</span>
-                <span>הגדרות</span>
-              </TabsTrigger>
-              <TabsTrigger value="emergency" className="gap-2">
-                <span className="text-lg">🆘</span>
-                <span>קשר</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2">
-                <span className="text-lg">📈</span>
-                <span>ניתוח</span>
-              </TabsTrigger>
-              <TabsTrigger value="report" className="gap-2">
-                <span className="text-lg">✍️</span>
-                <span>דיווח</span>
-              </TabsTrigger>
-              <TabsTrigger value="overview" className="gap-2">
-                <span className="text-lg">📊</span>
-                <span>לוח בקרה</span>
-              </TabsTrigger>
-            </TabsList>
+      {/* Mobile Content with bottom navigation */}
+      <div className="md:hidden pb-24">
+        <div className="mx-auto max-w-7xl px-3">
+          {activeTab === "overview" && (
+            <DashboardOverview
+              userEmail={user.email || ""}
+              userId={user.id}
+              onNavigateToReport={() => setActiveTab("report")}
+            />
+          )}
 
-            {/* Mobile Bottom Navigation - native app style */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-bottom">
-              <div className="grid grid-cols-5 h-16">
-                <button
-                  onClick={() => setActiveTab("settings")}
-                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "settings" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xl">⚙️</span>
-                  <span className="text-xs font-medium">הגדרות</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("emergency")}
-                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "emergency" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xl">🆘</span>
-                  <span className="text-xs font-medium">קשר</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("analytics")}
-                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "analytics" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xl">📈</span>
-                  <span className="text-xs font-medium">ניתוח</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("report")}
-                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "report" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xl">✍️</span>
-                  <span className="text-xs font-medium">דיווח</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("overview")}
-                  className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                    activeTab === "overview" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xl">📊</span>
-                  <span className="text-xs font-medium">בקרה</span>
-                </button>
-              </div>
+          {activeTab === "report" && (
+            <div className="max-w-3xl mx-auto">
+              <MoodTrackerForm />
             </div>
+          )}
 
-            <TabsContent value="overview" className="mt-0">
-              <DashboardOverview
-                userEmail={user.email || ""}
-                userId={user.id}
-                onNavigateToReport={() => setActiveTab("report")}
-              />
-            </TabsContent>
+          {activeTab === "analytics" && <AnalyticsTab userId={user.id} />}
 
-            <TabsContent value="report" className="mt-0">
-              <div className="max-w-3xl mx-auto">
-                <MoodTrackerForm />
-              </div>
-            </TabsContent>
+          {activeTab === "emergency" && <EmergencyContactTab />}
 
-            <TabsContent value="analytics" className="mt-0">
-              <AnalyticsTab userId={user.id} />
-            </TabsContent>
+          {activeTab === "settings" && <SettingsTab userEmail={user.email || ""} />}
+        </div>
+      </div>
 
-            <TabsContent value="emergency" className="mt-0">
-              <EmergencyContactTab />
-            </TabsContent>
-
-            <TabsContent value="settings" className="mt-0">
-              <SettingsTab userEmail={user.email || ""} />
-            </TabsContent>
-          </Tabs>
+      {/* Mobile Bottom Navigation - native app style */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-bottom">
+        <div className="grid grid-cols-5 h-16">
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 transition-colors",
+              activeTab === "settings" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Settings className="w-5 h-5" />
+            <span className="text-xs font-medium">הגדרות</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("emergency")}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 transition-colors",
+              activeTab === "emergency" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Phone className="w-5 h-5" />
+            <span className="text-xs font-medium">קשר</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 transition-colors",
+              activeTab === "analytics" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-xs font-medium">ניתוח</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("report")}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 transition-colors",
+              activeTab === "report" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <FileText className="w-5 h-5" />
+            <span className="text-xs font-medium">דיווח</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 transition-colors",
+              activeTab === "overview" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <BarChart3 className="w-5 h-5" />
+            <span className="text-xs font-medium">בקרה</span>
+          </button>
         </div>
       </div>
     </div>

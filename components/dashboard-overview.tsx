@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Clock, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
+import { ArrowLeft, TrendingUp, TrendingDown, Clock, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
 
 interface MoodEntry {
   id: string
@@ -174,186 +174,151 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
     stats.avgMood > 0 ? getMoodStatus(stats.avgMood) : { text: "אין נתונים", color: "text-muted-foreground" }
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">מזג האוויר הרגשי שלך</CardTitle>
-          <CardDescription>מצבך הרגשי הכללי</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center">
-          <div className="mb-4">{getWeatherIcon(enhancedStats.emotionalWeather)}</div>
-          <p className="text-3xl font-bold mb-2">{enhancedStats.emotionalWeather}</p>
-          <p className="text-muted-foreground text-center">
-            {enhancedStats.emotionalWeather === "שמש בהיר" && "מצב רוח מצוין! המשך ככה!"}
-            {enhancedStats.emotionalWeather === "מעונן חלקית" && "מצב טוב בסך הכל, יש מקום לשיפור"}
-            {enhancedStats.emotionalWeather === "מעונן" && "ימים קשים קצת, שמור על עצמך"}
-            {enhancedStats.emotionalWeather === "גשום" && "זמן קשה, אולי כדאי לפנות לעזרה"}
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-2xl">המצב שלך כרגע</CardTitle>
-          <CardDescription>סיכום המצב הרגשי שלך</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="text-center flex-1">
-              <div className="text-6xl mb-2">{getMoodEmoji(stats.avgMood)}</div>
-              <p className={`text-xl font-bold ${moodStatus.color}`}>{moodStatus.text}</p>
-            </div>
-            <div className="flex-1 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">מצב רוח ממוצע:</span>
-                <span className="text-2xl font-bold">{stats.avgMood > 0 ? stats.avgMood : "-"}/10</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">אנרגיה ממוצעת:</span>
-                <span className="text-2xl font-bold">{stats.avgEnergy > 0 ? stats.avgEnergy : "-"}/10</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">לחץ ממוצע:</span>
-                <span className="text-2xl font-bold">{stats.avgStress > 0 ? stats.avgStress : "-"}/10</span>
-              </div>
-            </div>
-          </div>
-
-          <Button size="lg" className="w-full" onClick={onNavigateToReport}>
-            דווח על מצב רוח עכשיו
-            <ArrowLeft className="mr-2 h-5 w-5" />
-          </Button>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">סה״כ רשומות</CardTitle>
-            <span className="text-2xl">📝</span>
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">מזג האוויר הרגשי</CardTitle>
+            <CardDescription className="text-xs">מצבך הכללי</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.totalEntries}</div>
-            <p className="text-xs text-muted-foreground mt-1">דיווחים שנשמרו</p>
+          <CardContent className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div>{getWeatherIcon(enhancedStats.emotionalWeather)}</div>
+              <div>
+                <p className="text-2xl font-bold">{enhancedStats.emotionalWeather}</p>
+                <p className="text-xs text-muted-foreground">
+                  {enhancedStats.emotionalWeather === "שמש בהיר" && "מצוין!"}
+                  {enhancedStats.emotionalWeather === "מעונן חלקית" && "טוב בסך הכל"}
+                  {enhancedStats.emotionalWeather === "מעונן" && "ימים קשים"}
+                  {enhancedStats.emotionalWeather === "גשום" && "זמן קשה"}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-red-500/5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">רצף ימים</CardTitle>
-            <span className="text-2xl">🔥</span>
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">המצב שלך כרגע</CardTitle>
+            <CardDescription className="text-xs">ממוצעים כלליים</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <p className="text-xs text-muted-foreground">מצב רוח</p>
+                <p className="text-2xl font-bold">{stats.avgMood > 0 ? stats.avgMood : "-"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">אנרגיה</p>
+                <p className="text-2xl font-bold">{stats.avgEnergy > 0 ? stats.avgEnergy : "-"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">לחץ</p>
+                <p className="text-2xl font-bold">{stats.avgStress > 0 ? stats.avgStress : "-"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm">רשומות</CardTitle>
+              <span className="text-xl">📝</span>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{enhancedStats.currentStreak}</div>
-            <p className="text-xs text-muted-foreground mt-1">ימים ברציפות</p>
+            <div className="text-2xl font-bold">{stats.totalEntries}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-500/20">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm">רצף ימים</CardTitle>
+              <span className="text-xl">🔥</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{enhancedStats.currentStreak}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">דיווח אחרון</CardTitle>
-            <span className="text-2xl">⏰</span>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm">שבועי</CardTitle>
+              {enhancedStats.weekComparison > 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              ) : enhancedStats.weekComparison < 0 ? (
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              ) : null}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold">
-              {stats.lastEntry
-                ? new Date(stats.lastEntry.created_at).toLocaleDateString("he-IL", {
-                    day: "numeric",
-                    month: "short",
-                  })
-                : "אין"}
+            <div className="text-2xl font-bold">
+              {enhancedStats.weekComparison > 0 ? "+" : ""}
+              {enhancedStats.weekComparison}%
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {stats.lastEntry
-                ? new Date(stats.lastEntry.created_at).toLocaleTimeString("he-IL", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "טרם דווח"}
-            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm">חודשי</CardTitle>
+              {enhancedStats.monthComparison > 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              ) : enhancedStats.monthComparison < 0 ? (
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              ) : null}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {enhancedStats.monthComparison > 0 ? "+" : ""}
+              {enhancedStats.monthComparison}%
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">השוואה שבועית</CardTitle>
-              <Calendar className="h-5 w-5 text-muted-foreground" />
+        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <CardTitle className="text-sm">זמן אידיאלי</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              {enhancedStats.weekComparison > 0 ? (
-                <TrendingUp className="h-8 w-8 text-green-500" />
-              ) : enhancedStats.weekComparison < 0 ? (
-                <TrendingDown className="h-8 w-8 text-red-500" />
-              ) : (
-                <div className="h-8 w-8" />
-              )}
-              <div>
-                <p className="text-2xl font-bold">
-                  {enhancedStats.weekComparison > 0 ? "+" : ""}
-                  {enhancedStats.weekComparison}%
-                </p>
-                <p className="text-sm text-muted-foreground">לעומת השבוע שעבר</p>
-              </div>
-            </div>
+            <p className="text-xl font-bold">{enhancedStats.bestReportingTime}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">השוואה חודשית</CardTitle>
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-            </div>
+        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">פעולה מהירה</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              {enhancedStats.monthComparison > 0 ? (
-                <TrendingUp className="h-8 w-8 text-green-500" />
-              ) : enhancedStats.monthComparison < 0 ? (
-                <TrendingDown className="h-8 w-8 text-red-500" />
-              ) : (
-                <div className="h-8 w-8" />
-              )}
-              <div>
-                <p className="text-2xl font-bold">
-                  {enhancedStats.monthComparison > 0 ? "+" : ""}
-                  {enhancedStats.monthComparison}%
-                </p>
-                <p className="text-sm text-muted-foreground">לעומת החודש שעבר</p>
-              </div>
-            </div>
+            <Button className="w-full" onClick={onNavigateToReport}>
+              דווח עכשיו
+              <ArrowLeft className="mr-2 h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            <CardTitle>זמן אידיאלי לדיווח</CardTitle>
-          </div>
-          <CardDescription>על סמך ההיסטוריה שלך</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-center">{enhancedStats.bestReportingTime}</p>
-          <p className="text-sm text-muted-foreground text-center mt-2">נראה שאתה נוטה לדווח בזמן הזה - המשך בשגרה!</p>
-        </CardContent>
-      </Card>
-
       {stats.lastEntry && (
         <Card>
-          <CardHeader>
-            <CardTitle>הדיווח האחרון שלך</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">הדיווח האחרון</CardTitle>
+            <CardDescription className="text-xs">
               {new Date(stats.lastEntry.created_at).toLocaleDateString("he-IL", {
-                year: "numeric",
-                month: "long",
                 day: "numeric",
+                month: "short",
                 hour: "2-digit",
                 minute: "2-digit",
               })}
@@ -362,21 +327,21 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">מצב רוח</p>
-                <p className="text-3xl">{getMoodEmoji(stats.lastEntry.mood_level)}</p>
-                <p className="text-lg font-bold mt-1">{stats.lastEntry.mood_level}/10</p>
+                <p className="text-xs text-muted-foreground mb-1">מצב רוח</p>
+                <p className="text-2xl">{getMoodEmoji(stats.lastEntry.mood_level)}</p>
+                <p className="text-sm font-bold">{stats.lastEntry.mood_level}/10</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">אנרגיה</p>
-                <p className="text-3xl">⚡</p>
-                <p className="text-lg font-bold mt-1">{stats.lastEntry.energy_level}/10</p>
+                <p className="text-xs text-muted-foreground mb-1">אנרגיה</p>
+                <p className="text-2xl">⚡</p>
+                <p className="text-sm font-bold">{stats.lastEntry.energy_level}/10</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">לחץ</p>
-                <p className="text-3xl">
+                <p className="text-xs text-muted-foreground mb-1">לחץ</p>
+                <p className="text-2xl">
                   {stats.lastEntry.stress_level <= 3 ? "😌" : stats.lastEntry.stress_level <= 6 ? "😰" : "🤯"}
                 </p>
-                <p className="text-lg font-bold mt-1">{stats.lastEntry.stress_level}/10</p>
+                <p className="text-sm font-bold">{stats.lastEntry.stress_level}/10</p>
               </div>
             </div>
           </CardContent>
