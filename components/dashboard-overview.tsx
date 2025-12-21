@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Clock, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
 
 interface MoodEntry {
   id: string
@@ -27,6 +27,13 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
     avgEnergy: 0,
     avgStress: 0,
     lastEntry: null as MoodEntry | null,
+  })
+  const [enhancedStats, setEnhancedStats] = useState({
+    currentStreak: 0,
+    bestReportingTime: "",
+    weekComparison: 0,
+    monthComparison: 0,
+    emotionalWeather: "",
   })
   const [isLoading, setIsLoading] = useState(true)
 
@@ -54,12 +61,80 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
           avgStress: Math.round(avgStress * 10) / 10,
           lastEntry: data[0] || null,
         })
+
+        calculateEnhancedStats(data, avgMood)
       }
     } catch (error) {
       console.error("[v0] Unexpected error:", error)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const calculateEnhancedStats = (entries: MoodEntry[], currentAvgMood: number) => {
+    let streak = 0
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    for (let i = 0; i < entries.length; i++) {
+      const entryDate = new Date(entries[i].created_at)
+      entryDate.setHours(0, 0, 0, 0)
+      const daysDiff = Math.floor((today.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24))
+
+      if (daysDiff === i) {
+        streak++
+      } else {
+        break
+      }
+    }
+
+    const timeDistribution: { [key: string]: number } = {}
+    entries.forEach((entry) => {
+      const hour = new Date(entry.created_at).getHours()
+      const timeSlot = hour < 12 ? "בוקר (6:00-12:00)" : hour < 18 ? "אחר הצהריים (12:00-18:00)" : "ערב (18:00-24:00)"
+      timeDistribution[timeSlot] = (timeDistribution[timeSlot] || 0) + 1
+    })
+    const bestTime = Object.entries(timeDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || "אחר הצהריים (12:00-18:00)"
+
+    const oneWeekAgo = new Date()
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+    const thisWeek = entries.filter((e) => new Date(e.created_at) >= oneWeekAgo)
+    const twoWeeksAgo = new Date()
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
+    const lastWeek = entries.filter((e) => new Date(e.created_at) >= twoWeeksAgo && new Date(e.created_at) < oneWeekAgo)
+
+    const thisWeekAvg = thisWeek.length > 0 ? thisWeek.reduce((sum, e) => sum + e.mood_level, 0) / thisWeek.length : 0
+    const lastWeekAvg = lastWeek.length > 0 ? lastWeek.reduce((sum, e) => sum + e.mood_level, 0) / lastWeek.length : 0
+    const weekChange = thisWeekAvg && lastWeekAvg ? ((thisWeekAvg - lastWeekAvg) / lastWeekAvg) * 100 : 0
+
+    const oneMonthAgo = new Date()
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+    const thisMonth = entries.filter((e) => new Date(e.created_at) >= oneMonthAgo)
+    const twoMonthsAgo = new Date()
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2)
+    const lastMonth = entries.filter(
+      (e) => new Date(e.created_at) >= twoMonthsAgo && new Date(e.created_at) < oneMonthAgo,
+    )
+
+    const thisMonthAvg =
+      thisMonth.length > 0 ? thisMonth.reduce((sum, e) => sum + e.mood_level, 0) / thisMonth.length : 0
+    const lastMonthAvg =
+      lastMonth.length > 0 ? lastMonth.reduce((sum, e) => sum + e.mood_level, 0) / lastMonth.length : 0
+    const monthChange = thisMonthAvg && lastMonthAvg ? ((thisMonthAvg - lastMonthAvg) / lastMonthAvg) * 100 : 0
+
+    let weather = "שמש בהיר"
+    if (currentAvgMood >= 8) weather = "שמש בהיר"
+    else if (currentAvgMood >= 6) weather = "מעונן חלקית"
+    else if (currentAvgMood >= 4) weather = "מעונן"
+    else weather = "גשום"
+
+    setEnhancedStats({
+      currentStreak: streak,
+      bestReportingTime: bestTime,
+      weekComparison: Math.round(weekChange),
+      monthComparison: Math.round(monthChange),
+      emotionalWeather: weather,
+    })
   }
 
   const getMoodEmoji = (level: number) => {
@@ -76,6 +151,21 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
     return { text: "מצוין!", color: "text-green-600" }
   }
 
+  const getWeatherIcon = (weather: string) => {
+    switch (weather) {
+      case "שמש בהיר":
+        return <Sun className="h-16 w-16 text-yellow-500" />
+      case "מעונן חלקית":
+        return <Cloud className="h-16 w-16 text-blue-400" />
+      case "מעונן":
+        return <CloudRain className="h-16 w-16 text-blue-600" />
+      case "גשום":
+        return <CloudSnow className="h-16 w-16 text-blue-800" />
+      default:
+        return <Cloud className="h-16 w-16" />
+    }
+  }
+
   if (isLoading) {
     return <div className="text-center py-12">טוען נתונים...</div>
   }
@@ -85,7 +175,23 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
 
   return (
     <div className="space-y-6">
-      {/* כרטיס מצב נוכחי */}
+      <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">מזג האוויר הרגשי שלך</CardTitle>
+          <CardDescription>מצבך הרגשי הכללי</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center">
+          <div className="mb-4">{getWeatherIcon(enhancedStats.emotionalWeather)}</div>
+          <p className="text-3xl font-bold mb-2">{enhancedStats.emotionalWeather}</p>
+          <p className="text-muted-foreground text-center">
+            {enhancedStats.emotionalWeather === "שמש בהיר" && "מצב רוח מצוין! המשך ככה!"}
+            {enhancedStats.emotionalWeather === "מעונן חלקית" && "מצב טוב בסך הכל, יש מקום לשיפור"}
+            {enhancedStats.emotionalWeather === "מעונן" && "ימים קשים קצת, שמור על עצמך"}
+            {enhancedStats.emotionalWeather === "גשום" && "זמן קשה, אולי כדאי לפנות לעזרה"}
+          </p>
+        </CardContent>
+      </Card>
+
       <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
         <CardHeader>
           <CardTitle className="text-2xl">המצב שלך כרגע</CardTitle>
@@ -120,7 +226,6 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
         </CardContent>
       </Card>
 
-      {/* סטטיסטיקות כלליות */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -133,13 +238,13 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-red-500/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">מעקב רציף</CardTitle>
+            <CardTitle className="text-sm font-medium">רצף ימים</CardTitle>
             <span className="text-2xl">🔥</span>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.totalEntries > 0 ? Math.min(stats.totalEntries, 7) : 0}</div>
+            <div className="text-3xl font-bold">{enhancedStats.currentStreak}</div>
             <p className="text-xs text-muted-foreground mt-1">ימים ברציפות</p>
           </CardContent>
         </Card>
@@ -170,7 +275,76 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
         </Card>
       </div>
 
-      {/* דיווח אחרון */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">השוואה שבועית</CardTitle>
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              {enhancedStats.weekComparison > 0 ? (
+                <TrendingUp className="h-8 w-8 text-green-500" />
+              ) : enhancedStats.weekComparison < 0 ? (
+                <TrendingDown className="h-8 w-8 text-red-500" />
+              ) : (
+                <div className="h-8 w-8" />
+              )}
+              <div>
+                <p className="text-2xl font-bold">
+                  {enhancedStats.weekComparison > 0 ? "+" : ""}
+                  {enhancedStats.weekComparison}%
+                </p>
+                <p className="text-sm text-muted-foreground">לעומת השבוע שעבר</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">השוואה חודשית</CardTitle>
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              {enhancedStats.monthComparison > 0 ? (
+                <TrendingUp className="h-8 w-8 text-green-500" />
+              ) : enhancedStats.monthComparison < 0 ? (
+                <TrendingDown className="h-8 w-8 text-red-500" />
+              ) : (
+                <div className="h-8 w-8" />
+              )}
+              <div>
+                <p className="text-2xl font-bold">
+                  {enhancedStats.monthComparison > 0 ? "+" : ""}
+                  {enhancedStats.monthComparison}%
+                </p>
+                <p className="text-sm text-muted-foreground">לעומת החודש שעבר</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            <CardTitle>זמן אידיאלי לדיווח</CardTitle>
+          </div>
+          <CardDescription>על סמך ההיסטוריה שלך</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold text-center">{enhancedStats.bestReportingTime}</p>
+          <p className="text-sm text-muted-foreground text-center mt-2">נראה שאתה נוטה לדווח בזמן הזה - המשך בשגרה!</p>
+        </CardContent>
+      </Card>
+
       {stats.lastEntry && (
         <Card>
           <CardHeader>

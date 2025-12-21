@@ -49,15 +49,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-svh w-full bg-gradient-to-br from-background to-muted/20">
+    <div className="min-h-svh w-full bg-gradient-to-br from-background to-muted/20 overflow-x-hidden">
       {/* Mobile Header - sticky at top */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 md:hidden">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-3 py-3 md:hidden safe-top">
+        <div className="flex items-center justify-between max-w-full">
+          <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold truncate">שלום, {user.email?.split("@")[0]}!</h1>
-            <p className="text-xs text-muted-foreground">איך אתה מרגיש היום?</p>
+            <p className="text-xs text-muted-foreground truncate">איך אתה מרגיש היום?</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <ThemeToggle />
             <UserProfileMenu email={user.email || ""} createdAt={user.created_at} onSignOut={handleSignOut} />
           </div>
@@ -81,8 +81,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Content with mobile padding */}
-      <div className="pb-20 md:pb-6">
-        <div className="mx-auto max-w-7xl px-4 md:px-10">
+      <div className="pb-24 md:pb-6">
+        <div className="mx-auto max-w-7xl px-3 md:px-10">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             {/* Desktop Tabs - horizontal */}
             <TabsList className="hidden md:grid w-full grid-cols-5 mb-8" dir="ltr">
