@@ -2,27 +2,65 @@ import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const requestUrl = new URL(request.url)
+  const { searchParams, origin, hostname, protocol } = requestUrl
   const code = searchParams.get("code")
-  const next = searchParams.get("next") ?? "/dashboard"
+  const errorParam = searchParams.get("error")
+  const errorCode = searchParams.get("error_code")
+  const errorDescription = searchParams.get("error_description")
+  
+  // if "next" is in param, use it as the redirect URL
+  let next = searchParams.get("next") ?? "/dashboard"
+  if (!next.startsWith("/")) {
+    // if "next" is not a relative URL, use the default
+    next = "/dashboard"
+  }
 
-  console.log("[v0] Auth callback received:", { code: !!code, next, origin })
+
+  const supabase = await createClient()
+
+  // אם יש שגיאה מ-Google OAuth או מ-Supabase
+  if (errorParam || errorCode) {
+    const errorMessage = errorDescription || errorParam || "שגיאה בהתחברות"
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorMessage)}`)
+  }
 
   if (code) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    try {
+      const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (error) {
-      console.error("[v0] Error exchanging code for session:", error)
-      return NextResponse.redirect(`${origin}/?error=${encodeURIComponent(error.message)}`)
+      if (error) {
+        return NextResponse.redirect(
+          `${origin}/login?error=${encodeURIComponent(error.message || "שגיאה בהתחברות")}`
+        )
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        return NextResponse.redirect(
+          `${origin}/login?error=${encodeURIComponent("ההתחברות נכשלה")}`
+        )
+      }
+
+      return NextResponse.redirect(`${origin}${next}`)
+    } catch (err) {
+      return NextResponse.redirect(
+        `${origin}/login?error=${encodeURIComponent("שגיאה בלתי צפויה")}`
+      )
     }
+  }
 
-    console.log("[v0] Successfully exchanged code, redirecting to:", next)
-    const forwardedSearchParams = new URLSearchParams()
+  // אם אין code, בדוק אם המשתמש כבר מחובר
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
     return NextResponse.redirect(`${origin}${next}`)
   }
 
-  // אם אין code, חזור לדף הבית
-  console.log("[v0] No code found, redirecting to home")
-  return NextResponse.redirect(`${origin}/`)
+  return NextResponse.redirect(`${origin}/login`)
 }

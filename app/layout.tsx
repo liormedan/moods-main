@@ -1,7 +1,8 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Heebo } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { ClerkProvider } from "@clerk/nextjs"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 
@@ -15,17 +16,6 @@ export const metadata: Metadata = {
   title: "MOODS - לניהול מצבי רוח",
   description: "עקוב אחרי מצב הרוח שלך באופן יומי",
   generator: "v0.app",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#40B5AD" },
-    { media: "(prefers-color-scheme: dark)", color: "#40B5AD" },
-  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -50,18 +40,34 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#40B5AD" },
+    { media: "(prefers-color-scheme: dark)", color: "#40B5AD" },
+  ],
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="he" dir="rtl">
-      <body className={`${heebo.variable} font-sans antialiased`}>
-        {children}
-        <Analytics />
-        <Toaster />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="he" dir="rtl">
+        <body className={`${heebo.variable} font-sans antialiased`}>
+          {children}
+          {process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_VERCEL_ENV && (
+            <Analytics />
+          )}
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

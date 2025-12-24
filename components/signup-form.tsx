@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { useSignUp } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,10 +18,13 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { signUp, setActive } = useSignUp()
+
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
+    if (!signUp) return
+    
     setIsLoading(true)
     setError(null)
 
@@ -32,17 +35,37 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
+      const result = await signUp.create({
+        emailAddress: email,
         password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
-        },
       })
-      if (error) throw error
-      router.push("/dashboard")
-      router.refresh()
+
+      console.log("🟣 [SIGNUP] Sign up result:", {
+        status: result.status,
+        hasSessionId: !!result.createdSessionId,
+      })
+
+      if (result.status === "complete") {
+        if (result.createdSessionId) {
+          await setActive({ session: result.createdSessionId })
+          console.log("🟣 [SIGNUP] Session activated, redirecting to dashboard")
+          // Use window.location for more reliable redirect
+          window.location.href = "/dashboard"
+        } else {
+          setError("ההרשמה הושלמה אבל לא נוצר session. אנא נסה להתחבר.")
+        }
+      } else if (result.status === "missing_requirements") {
+        // Handle email verification or other requirements
+        if (result.unverifiedFields?.includes("email_address")) {
+          setError("נא לאמת את האימייל שלך - נשלח לך אימייל")
+        } else {
+          setError("נא להשלים את כל השדות הנדרשים")
+        }
+      } else {
+        setError("ההרשמה לא הושלמה. נא לנסות שוב.")
+      }
     } catch (error: unknown) {
+      console.error("🔴 [SIGNUP] Sign up error:", error)
       setError(error instanceof Error ? error.message : "אירעה שגיאה")
     } finally {
       setIsLoading(false)
@@ -50,20 +73,17 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
   }
 
   const handleGoogleSignup = async () => {
-    const supabase = createClient()
+    if (!signUp) return
+    
     setIsLoading(true)
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          skipBrowserRedirect: false,
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
-        },
+      await signUp.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: `${window.location.origin}/sso-callback`,
+        redirectUrlComplete: `${window.location.origin}/dashboard`,
       })
-      if (error) throw error
-      // הדפדפן מבצע redirect אוטומטי
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "אירעה שגיאה בהרשמה עם Google")
       setIsLoading(false)
@@ -72,6 +92,8 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      {/* Clerk CAPTCHA widget - hidden, used for bot protection */}
+      <div id="clerk-captcha" style={{ display: "none" }} />
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">הרשמה</CardTitle>
@@ -127,7 +149,12 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                 type="button"
                 variant="outline"
                 className="w-full bg-transparent"
-                onClick={handleGoogleSignup}
+                onClick={(e) => {
+                  console.log("🟣 [SIGNUP] Google button clicked!")
+                  console.log("🟣 [SIGNUP] Event:", e)
+                  console.log("🟣 [SIGNUP] Current URL:", window.location.href)
+                  handleGoogleSignup()
+                }}
                 disabled={isLoading}
               >
                 <svg className="ml-2 h-4 w-4" viewBox="0 0 24 24">
@@ -153,7 +180,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
             </div>
             <div className="mt-4 text-center text-sm">
               כבר יש לך חשבון?{" "}
-              <Link href="/login" className="underline underline-offset-4">
+              <Link href="/login" prefetch={false} className="underline underline-offset-4">
                 התחבר
               </Link>
             </div>

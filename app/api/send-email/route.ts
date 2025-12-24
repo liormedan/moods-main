@@ -2,8 +2,6 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -16,6 +14,17 @@ export async function POST(request: NextRequest) {
     }
 
     const { to, subject, message } = await request.json()
+
+    // בדוק אם יש API key לפני יצירת Resend
+    const resendApiKey = process.env.RESEND_API_KEY
+    if (!resendApiKey) {
+      return NextResponse.json(
+        { error: "שירות שליחת המייל לא מוגדר. אנא צור קשר עם התמיכה." },
+        { status: 503 }
+      )
+    }
+
+    const resend = new Resend(resendApiKey)
 
     try {
       await resend.emails.send({

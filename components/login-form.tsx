@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { useSignIn } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,21 +20,27 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   const [resetEmail, setResetEmail] = useState("")
   const [resetMessage, setResetMessage] = useState<string | null>(null)
   const router = useRouter()
+  const { signIn, setActive } = useSignIn()
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
+    if (!signIn) return
+    
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
+      const result = await signIn.create({
+        identifier: email,
         password,
       })
-      if (error) throw error
-      router.push("/dashboard")
-      router.refresh()
+
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId })
+        router.push("/dashboard")
+        router.refresh()
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "אירעה שגיאה")
     } finally {
@@ -43,23 +49,23 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   }
 
   const handleGoogleLogin = async () => {
-    const supabase = createClient()
+    if (!signIn) return
+    
     setIsLoading(true)
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          skipBrowserRedirect: false,
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
-        },
+      // Clerk will handle both sign-in and sign-up automatically
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: `${window.location.origin}/sso-callback`,
+        redirectUrlComplete: `${window.location.origin}/dashboard`,
       })
-      if (error) throw error
-      // הדפדפן מבצע redirect אוטומטי
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "אירעה שגיאה בהתחברות עם Google")
+      const errorMessage = error instanceof Error ? error.message : "אירעה שגיאה בהתחברות עם Google"
+      setError(errorMessage)
       setIsLoading(false)
+      console.error("Google login error:", error)
     }
   }
 
@@ -210,7 +216,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             </div>
             <div className="mt-4 text-center text-sm">
               אין לך חשבון?{" "}
-              <Link href="/signup" className="underline underline-offset-4">
+              <Link href="/signup" prefetch={false} className="underline underline-offset-4">
                 הירשם
               </Link>
             </div>

@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { useUser, useClerk } from "@clerk/nextjs"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { MoodTrackerForm } from "@/components/mood-tracker-form"
 import { AnalyticsTab } from "@/components/analytics-tab"
@@ -15,40 +15,24 @@ import { Plus, BarChart3, FileText, TrendingUp, Phone, Settings, ChevronLeft, Ch
 import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("overview")
   const [isMoodDialogOpen, setIsMoodDialogOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const router = useRouter()
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const supabase = createClient()
-      const { data, error } = await supabase.auth.getUser()
-
-      if (error || !data?.user) {
-        router.push("/login")
-      } else {
-        setUser(data.user)
-      }
-      setIsLoading(false)
-    }
-
-    loadUser()
-  }, [router])
+  const { user, isLoaded } = useUser()
+  const { signOut } = useClerk()
 
   const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push("/login")
+    await signOut()
+    router.push("/")
   }
 
-  if (isLoading) {
+  if (!isLoaded) {
     return <div className="min-h-svh flex items-center justify-center">טוען...</div>
   }
 
   if (!user) {
+    router.push("/login")
     return null
   }
 
@@ -66,7 +50,7 @@ export default function DashboardPage() {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-3 py-3 md:hidden safe-top">
         <div className="flex items-center justify-between gap-3 max-w-full">
           <div className="flex-1 min-w-0 text-right">
-            <h1 className="text-lg font-bold truncate">שלום, {user.email?.split("@")[0]}!</h1>
+            <h1 className="text-lg font-bold truncate">שלום, {user.primaryEmailAddress?.emailAddress?.split("@")[0]}!</h1>
             <p className="text-xs text-muted-foreground">איך אתה מרגיש היום?</p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
@@ -74,7 +58,7 @@ export default function DashboardPage() {
               <ThemeToggle />
             </div>
             <div className="rounded-lg border border-border bg-card/50">
-              <UserProfileMenu email={user.email || ""} createdAt={user.created_at} onSignOut={handleSignOut} />
+              <UserProfileMenu email={user.primaryEmailAddress?.emailAddress || ""} createdAt={user.createdAt?.toISOString() || ""} onSignOut={handleSignOut} />
             </div>
           </div>
         </div>
@@ -135,8 +119,8 @@ export default function DashboardPage() {
             </div>
             <div className={cn("w-full", isSidebarCollapsed && "flex justify-center")}>
               <UserProfileMenu
-                email={user.email || ""}
-                createdAt={user.created_at}
+                email={user.primaryEmailAddress?.emailAddress || ""}
+                createdAt={user.createdAt?.toISOString() || ""}
                 onSignOut={handleSignOut}
                 compact={isSidebarCollapsed}
               />
@@ -155,14 +139,14 @@ export default function DashboardPage() {
           <div className="p-6 md:p-10">
             <div className="mx-auto max-w-6xl">
               <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold">שלום, {user.email?.split("@")[0]}!</h1>
+                <h1 className="text-3xl font-bold">שלום, {user.primaryEmailAddress?.emailAddress?.split("@")[0]}!</h1>
                 <p className="text-muted-foreground mt-1">איך אתה מרגיש היום?</p>
               </div>
 
               {/* Content */}
               {activeTab === "overview" && (
                 <DashboardOverview
-                  userEmail={user.email || ""}
+                  userEmail={user.primaryEmailAddress?.emailAddress || ""}
                   userId={user.id}
                   onNavigateToReport={() => setActiveTab("report")}
                 />

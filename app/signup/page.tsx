@@ -1,27 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
 import { Activity } from "lucide-react"
-import { LoginForm } from "@/components/login-form"
 import { SignupForm } from "@/components/signup-form"
-import { Button } from "@/components/ui/button"
 
-export default function Page() {
-  const [isLogin, setIsLogin] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default function SignupPage() {
   const router = useRouter()
   const { user, isLoaded } = useUser()
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const errorParam = urlParams.get("error")
-    if (errorParam) {
-      setError(decodeURIComponent(errorParam))
-      window.history.replaceState({}, "", window.location.pathname)
-    }
-
     if (isLoaded && user) {
       router.push("/dashboard")
     }
@@ -55,25 +44,7 @@ export default function Page() {
             <p className="text-xl text-muted-foreground">לניהול מצבי רוח</p>
           </div>
 
-          {/* Toggle between login and signup */}
-          <div className="flex gap-2 p-1 bg-muted rounded-lg">
-            <Button variant={isLogin ? "default" : "ghost"} className="flex-1" onClick={() => setIsLogin(true)}>
-              התחברות
-            </Button>
-            <Button variant={!isLogin ? "default" : "ghost"} className="flex-1" onClick={() => setIsLogin(false)}>
-              הרשמה
-            </Button>
-          </div>
-
-          {/* Error message */}
-          {error && (
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Forms */}
-          {isLogin ? <LoginForm /> : <SignupForm />}
+          <SignupForm />
         </div>
       </div>
 
@@ -92,3 +63,4 @@ export default function Page() {
     </div>
   )
 }
+
