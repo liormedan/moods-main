@@ -71,16 +71,17 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
+    if (!signIn) return
+    
     setIsLoading(true)
     setError(null)
     setResetMessage(null)
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+      await signIn.create({
+        strategy: "reset_password_email_code",
+        identifier: resetEmail,
       })
-      if (error) throw error
       setResetMessage("נשלח אליך מייל עם קישור לאיפוס הסיסמה")
       setResetEmail("")
       setTimeout(() => setShowResetPassword(false), 3000)
