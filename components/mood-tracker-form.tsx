@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/neon/client"
 import {
   Dialog,
   DialogContent,

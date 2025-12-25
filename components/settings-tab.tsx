@@ -32,7 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/neon/client"
 
 interface SettingsTabProps {
   userEmail: string

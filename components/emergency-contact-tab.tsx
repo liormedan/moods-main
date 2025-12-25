@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Phone, MessageCircle, AlertCircle, MessageSquare, Calendar, CheckCircle, Mail } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/neon/client"
 import { toast } from "sonner"
 
 interface TherapistInfo {
