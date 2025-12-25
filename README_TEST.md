@@ -19,11 +19,17 @@ pnpm test:db
 ### Vercel CLI
 
 ```bash
-# Run tests via Vercel CLI
-vercel dev --run pnpm test:db
+# Run tests locally (recommended)
+pnpm test:db
 
-# Or run the shell script directly
-vercel dev --run bash scripts/test-database.sh
+# Or run via Vercel dev environment
+vercel dev
+# Then in another terminal:
+pnpm test:db
+
+# Note: Vercel CLI doesn't have a direct --run flag for scripts,
+# but you can run the test script in your local environment
+# and it will work the same way in Vercel's build environment
 ```
 
 ### Direct Execution
