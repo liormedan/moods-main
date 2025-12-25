@@ -62,6 +62,19 @@ Neon database URL is not set. Database features will not work.
 
 ---
 
+## בדיקת משתני סביבה
+
+לפני פריסה, תוכל לבדוק את משתני הסביבה עם הסקריפט:
+
+```bash
+pnpm run check:env
+```
+
+הסקריפט יבדוק:
+- ✅ האם כל המשתנים הנדרשים מוגדרים
+- ⚠️ האם אתה משתמש ב-development keys ב-production
+- ℹ️ האם משתנים אופציונליים מוגדרים
+
 ## איך להוסיף משתני סביבה ב-Vercel:
 
 1. היכנס ל-[Vercel Dashboard](https://vercel.com/dashboard)
