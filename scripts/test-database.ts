@@ -34,7 +34,7 @@ async function testSelect() {
   try {
     const client = createClient()
     const result = await client.from("mood_entries").select("*")
-    
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("SELECT * FROM mood_entries", true, undefined, {
@@ -43,12 +43,12 @@ async function testSelect() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("SELECT * FROM mood_entries", false, result.error.message, result)
       return false
     }
-    
+
     logTest("SELECT * FROM mood_entries", true, undefined, {
       dataType: Array.isArray(result.data) ? "array" : typeof result.data,
       dataLength: Array.isArray(result.data) ? result.data.length : "N/A"
@@ -64,7 +64,7 @@ async function testSelectWithOrder() {
   try {
     const client = createClient()
     const result = await client.from("mood_entries").select("*").order("created_at", { ascending: false })
-    
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("SELECT with ORDER BY", true, undefined, {
@@ -73,12 +73,12 @@ async function testSelectWithOrder() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("SELECT with ORDER BY", false, result.error.message, result)
       return false
     }
-    
+
     logTest("SELECT with ORDER BY", true, undefined, {
       dataType: Array.isArray(result.data) ? "array" : typeof result.data
     })
@@ -92,13 +92,13 @@ async function testSelectWithOrder() {
 async function testSelectWithWhere() {
   try {
     const client = createClient()
-    const result = await client.from("mood_entries").select("*").eq("user_id", "test-user-id")
-    
+    const result = await client.from("mood_entries").select("*").eq("user_id", "00000000-0000-0000-0000-000000000000")
+
     if (result.error) {
       logTest("SELECT with WHERE (eq)", false, result.error.message, result)
       return false
     }
-    
+
     logTest("SELECT with WHERE (eq)", true, undefined, {
       dataType: Array.isArray(result.data) ? "array" : typeof result.data
     })
@@ -112,8 +112,8 @@ async function testSelectWithWhere() {
 async function testSelectSingle() {
   try {
     const client = createClient()
-    const result = await client.from("mood_entries").select("*").eq("id", "test-id").single()
-    
+    const result = await client.from("mood_entries").select("*").eq("id", "00000000-0000-0000-0000-000000000000").single()
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("SELECT single", true, undefined, {
@@ -122,12 +122,12 @@ async function testSelectSingle() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("SELECT single", false, result.error.message, result)
       return false
     }
-    
+
     logTest("SELECT single", true, undefined, {
       hasData: result.data !== null
     })
@@ -142,16 +142,16 @@ async function testInsert() {
   try {
     const client = createClient()
     const testData = {
-      user_id: "test-user-id",
+      user_id: "00000000-0000-0000-0000-000000000000",
       mood_level: 5,
       energy_level: 5,
       stress_level: 5,
-      notes: "Test entry",
+      note: "Test entry",
       custom_metrics: []
     }
-    
+
     const result = await client.from("mood_entries").insert(testData)
-    
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("INSERT", true, undefined, {
@@ -160,12 +160,12 @@ async function testInsert() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("INSERT", false, result.error.message, result)
       return false
     }
-    
+
     logTest("INSERT", true, undefined, {
       hasData: result.data !== null
     })
@@ -180,14 +180,14 @@ async function testUpsert() {
   try {
     const client = createClient()
     const testData = {
-      user_id: "test-user-id",
+      user_id: "00000000-0000-0000-0000-000000000000",
       name: "Test Therapist",
       phone: "1234567890",
       email: "test@example.com"
     }
-    
+
     const result = await client.from("therapist_info").upsert(testData)
-    
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("UPSERT", true, undefined, {
@@ -196,12 +196,12 @@ async function testUpsert() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("UPSERT", false, result.error.message, result)
       return false
     }
-    
+
     logTest("UPSERT", true, undefined, {
       hasData: result.data !== null
     })
@@ -215,8 +215,8 @@ async function testUpsert() {
 async function testUpdate() {
   try {
     const client = createClient()
-    const result = await client.from("mood_entries").update({ notes: "Updated" }).eq("id", "test-id")
-    
+    const result = await client.from("mood_entries").update({ note: "Updated" }).eq("id", "00000000-0000-0000-0000-000000000000")
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("UPDATE", true, undefined, {
@@ -225,12 +225,12 @@ async function testUpdate() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("UPDATE", false, result.error.message, result)
       return false
     }
-    
+
     logTest("UPDATE", true, undefined, {
       hasData: result.data !== null
     })
@@ -244,8 +244,8 @@ async function testUpdate() {
 async function testDelete() {
   try {
     const client = createClient()
-    const result = await client.from("mood_entries").delete().eq("id", "test-id")
-    
+    const result = await client.from("mood_entries").delete().eq("id", "00000000-0000-0000-0000-000000000000")
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("DELETE", true, undefined, {
@@ -254,12 +254,12 @@ async function testDelete() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("DELETE", false, result.error.message, result)
       return false
     }
-    
+
     logTest("DELETE", true, undefined, {
       hasData: result.data !== null
     })
@@ -276,9 +276,9 @@ async function testComplexQuery() {
     const result = await client
       .from("mood_entries")
       .select("*")
-      .eq("user_id", "test-user-id")
+      .eq("user_id", "00000000-0000-0000-0000-000000000000")
       .order("created_at", { ascending: false })
-    
+
     // If database is not configured, this is expected behavior (not a failure)
     if (result.error && result.error.message?.includes("not configured")) {
       logTest("Complex query (SELECT + WHERE + ORDER)", true, undefined, {
@@ -287,12 +287,12 @@ async function testComplexQuery() {
       })
       return true
     }
-    
+
     if (result.error) {
       logTest("Complex query (SELECT + WHERE + ORDER)", false, result.error.message, result)
       return false
     }
-    
+
     logTest("Complex query (SELECT + WHERE + ORDER)", true, undefined, {
       dataType: Array.isArray(result.data) ? "array" : typeof result.data
     })
@@ -306,20 +306,19 @@ async function testComplexQuery() {
 async function testClientCreation() {
   try {
     const client = createClient()
-    
+
     if (!client) {
       logTest("Client creation", false, "Client is null or undefined")
       return false
     }
-    
+
     if (!client.from) {
       logTest("Client creation", false, "Client missing 'from' method")
       return false
     }
-    
+
     logTest("Client creation", true, undefined, {
-      hasFrom: typeof client.from === "function",
-      hasAuth: typeof client.auth === "object"
+      hasFrom: typeof client.from === "function"
     })
     return true
   } catch (error: any) {
@@ -328,25 +327,60 @@ async function testClientCreation() {
   }
 }
 
+async function setupTestUser() {
+  try {
+    const client = createClient()
+    const TEST_USER_ID = "00000000-0000-0000-0000-000000000000"
+
+    // Clean up previous test runs
+    console.log("Cleaning up previous test data...")
+    try {
+      await client.from("mood_entries").delete().eq("user_id", TEST_USER_ID)
+      await client.from("therapist_info").delete().eq("user_id", TEST_USER_ID)
+      // We don't necessarily delete users to avoid FK issues if other tables (not cleaned) exist, 
+      // but standard test flow should clean children first.
+    } catch (e) {
+      console.log("Cleanup warning (ignorable):", e)
+    }
+
+    // Upsert a test user to ensure FK constraints are met (if any)
+    const result = await client.from("users").upsert({
+      id: TEST_USER_ID,
+      email: "test@example.com",
+      name: "Test User"
+    })
+
+    if (result.error) {
+      // If table doesn't exist or other error, log but don't fail immediately as some dbs might process differently
+      console.log("Setup User Warning:", result.error.message)
+    } else {
+      console.log("✅ Setup Test User")
+    }
+  } catch (err: any) {
+    console.log("Setup User Error:", err.message)
+  }
+}
+
 async function runAllTests() {
   console.log("🧪 Starting Database Operations Tests...\n")
-  console.log("=" .repeat(60))
-  
+  console.log("=".repeat(60))
+
   // Check environment
   const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
   console.log(`\n📋 Environment Check:`)
   console.log(`   DATABASE_URL: ${databaseUrl ? "✅ Set" : "❌ Not set"}`)
   console.log(`   NEON_DATABASE_URL: ${process.env.NEON_DATABASE_URL ? "✅ Set" : "❌ Not set"}`)
-  
+
   if (!databaseUrl) {
     console.log(`\n⚠️  Warning: Database URL not set. Tests will use mock client.\n`)
   }
-  
+
   console.log("\n" + "=".repeat(60))
   console.log("Running Tests:\n")
-  
+
   // Run tests
   await testClientCreation()
+  await setupTestUser()
   await testSelect()
   await testSelectWithOrder()
   await testSelectWithWhere()
@@ -356,29 +390,29 @@ async function runAllTests() {
   await testUpdate()
   await testDelete()
   await testComplexQuery()
-  
+
   // Summary
   console.log("\n" + "=".repeat(60))
   console.log("\n📊 Test Summary:\n")
-  
+
   const passed = results.filter(r => r.passed).length
   const failed = results.filter(r => !r.passed).length
   const total = results.length
-  
+
   console.log(`Total Tests: ${total}`)
   console.log(`✅ Passed: ${passed}`)
   console.log(`❌ Failed: ${failed}`)
   console.log(`Success Rate: ${Math.round((passed / total) * 100)}%`)
-  
+
   if (failed > 0) {
     console.log("\n❌ Failed Tests:")
     results.filter(r => !r.passed).forEach(r => {
       console.log(`   - ${r.test}: ${r.error}`)
     })
   }
-  
+
   console.log("\n" + "=".repeat(60))
-  
+
   // Exit with appropriate code
   process.exit(failed > 0 ? 1 : 0)
 }
