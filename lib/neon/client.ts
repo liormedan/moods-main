@@ -21,33 +21,45 @@ export function createClient() {
 
 // Mock client factory - returns a client that won't crash but won't work
 function createMockClient() {
-  const mockQuery = {
-    select: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-    insert: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-    update: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-    delete: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-    upsert: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-    order: function(this: any) {
-      return {
-        select: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-      }
-    },
-    eq: function(this: any) {
-      return {
-        select: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-        single: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-        upsert: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-        delete: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-        update: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-        order: () => ({
-          select: () => Promise.resolve({ data: null, error: { message: "Neon database not configured" } }),
-        }),
-      }
-    },
+  const mockResult = Promise.resolve({ data: null, error: { message: "Neon database not configured" } })
+  
+  // Create a chainable query builder that supports all Supabase-like methods
+  const createMockQueryBuilder = () => {
+    const selectBuilder = {
+      order: () => mockResult,
+      eq: () => ({
+        select: () => mockResult,
+        single: () => mockResult,
+        order: () => mockResult,
+      }),
+    }
+    
+    const builder = {
+      select: () => selectBuilder,
+      insert: () => mockResult,
+      update: () => ({
+        eq: () => mockResult,
+      }),
+      delete: () => ({
+        eq: () => mockResult,
+      }),
+      upsert: () => mockResult,
+      order: () => mockResult,
+      eq: () => ({
+        select: () => mockResult,
+        single: () => mockResult,
+        upsert: () => mockResult,
+        delete: () => mockResult,
+        update: () => mockResult,
+        order: () => mockResult,
+      }),
+    }
+    
+    return builder
   }
 
   return {
-    from: () => mockQuery,
+    from: () => createMockQueryBuilder(),
     auth: {
       getUser: () => Promise.resolve({ data: { user: null }, error: null }),
       signOut: () => Promise.resolve({ error: null }),
