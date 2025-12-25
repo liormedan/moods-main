@@ -6,12 +6,14 @@
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
 - `CLERK_SECRET_KEY` - Clerk secret key
 
-### Database (Optional - for data features)
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL (for database access)
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key (for database access)
+⚠️ **These are REQUIRED** - The app will not work without them
 
-### Email Service (Optional)
+## Optional Environment Variables
+
+### Email Service (Optional - add later)
 - `RESEND_API_KEY` - Resend API key for sending emails
+- Only needed if you want to use email features
+- The app will work without it, but email sending will be disabled
 
 ## Middleware Configuration
 
@@ -22,7 +24,8 @@
 
 ## Notes
 
-- Supabase is still used for database operations (not authentication)
-- Clerk handles all authentication flows
+- Only Clerk credentials are required for the app to work
+- Resend can be added later for email features
+- Database features (if needed) will require additional setup in the future
 - Middleware properly configured with route protection
 
