@@ -17,11 +17,6 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   
-  // Handle static files
-  async rewrites() {
-    return []
-  },
-  
   // Force localhost in development
   ...(process.env.NODE_ENV === 'development' && {
     // Disable prefetching to prevent production URL issues
