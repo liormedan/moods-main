@@ -7,7 +7,8 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "test:db": "tsx scripts/test-database.ts"
+    "test:db": "tsx scripts/test-database.ts",
+    "test:integration": "tsx scripts/test-full-integration.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
