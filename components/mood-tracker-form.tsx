@@ -168,12 +168,21 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
       })
 
       if (error) {
-        console.error("[v0] Error saving mood entry:", error)
-        toast({
-          title: "שגיאה בשמירה",
-          description: "לא הצלחנו לשמור את מצב הרוח. נסה שוב.",
-          variant: "destructive",
-        })
+        // If error message indicates database not configured, show helpful message
+        if (error.message && error.message.includes("not configured")) {
+          toast({
+            title: "מסד נתונים לא מוגדר",
+            description: "אנא הגדר את מסד הנתונים כדי לשמור מצבי רוח.",
+            variant: "destructive",
+          })
+        } else {
+          console.error("[v0] Error saving mood entry:", error)
+          toast({
+            title: "שגיאה בשמירה",
+            description: "לא הצלחנו לשמור את מצב הרוח. נסה שוב.",
+            variant: "destructive",
+          })
+        }
       } else {
         toast({
           title: "נשמר בהצלחה!",

@@ -52,13 +52,22 @@ export function AnalyticsTab() {
       const { data, error } = await supabase.from("mood_entries").select("*").order("created_at", { ascending: false })
 
       if (error) {
-        console.error("Error loading entries:", error)
-      } else if (data) {
+        // If error message indicates database not configured, silently skip (expected behavior)
+        if (error.message && error.message.includes("not configured")) {
+          console.log("[v0] Database not configured, skipping entries load")
+        } else {
+          console.error("Error loading entries:", error)
+        }
+        setEntries([])
+      } else if (data && Array.isArray(data)) {
         setEntries(data)
         extractCustomMetrics(data)
+      } else {
+        setEntries([])
       }
     } catch (error) {
       console.error("Unexpected error:", error)
+      setEntries([])
     } finally {
       setIsLoading(false)
     }

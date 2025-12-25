@@ -48,8 +48,21 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
       const { data, error } = await supabase.from("mood_entries").select("*").order("created_at", { ascending: false })
 
       if (error) {
-        console.error("[v0] Error loading stats:", error)
-      } else if (data) {
+        // If error message indicates database not configured, silently skip (expected behavior)
+        if (error.message && error.message.includes("not configured")) {
+          console.log("[v0] Database not configured, skipping stats load")
+        } else {
+          console.error("[v0] Error loading stats:", error)
+        }
+        // Set empty stats when database is not available
+        setStats({
+          totalEntries: 0,
+          avgMood: 0,
+          avgEnergy: 0,
+          avgStress: 0,
+          lastEntry: null,
+        })
+      } else if (data && Array.isArray(data) && data.length > 0) {
         const totalEntries = data.length
         const avgMood = totalEntries > 0 ? data.reduce((sum, e) => sum + e.mood_level, 0) / totalEntries : 0
         const avgEnergy = totalEntries > 0 ? data.reduce((sum, e) => sum + e.energy_level, 0) / totalEntries : 0
@@ -64,9 +77,26 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
         })
 
         calculateEnhancedStats(data, avgMood)
+      } else {
+        // No data available, set empty stats
+        setStats({
+          totalEntries: 0,
+          avgMood: 0,
+          avgEnergy: 0,
+          avgStress: 0,
+          lastEntry: null,
+        })
       }
     } catch (error) {
       console.error("[v0] Unexpected error:", error)
+      // Set empty stats on error
+      setStats({
+        totalEntries: 0,
+        avgMood: 0,
+        avgEnergy: 0,
+        avgStress: 0,
+        lastEntry: null,
+      })
     } finally {
       setIsLoading(false)
     }
