@@ -10,8 +10,16 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Phone, MessageCircle, AlertCircle, MessageSquare, Calendar, CheckCircle, Mail } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/neon/client"
 import { toast } from "sonner"
+import {
+  getTherapistInfo,
+  updateTherapistInfo,
+  getTherapistTasks,
+  addTherapistTask,
+  toggleTherapistTask,
+  getAppointments,
+  addAppointment
+} from "@/app/actions/user-actions"
 
 interface TherapistInfo {
   name: string
@@ -47,29 +55,23 @@ export function EmergencyContactTab() {
   const [newAppointment, setNewAppointment] = useState({ date: "", time: "", notes: "" })
 
   useEffect(() => {
-    loadTherapistInfo()
-    loadTasks()
-    loadAppointments()
-  }, [])
+    if (user) {
+      loadTherapistInfo()
+      loadTasks()
+      loadAppointments()
+    }
+  }, [user])
 
   const loadTherapistInfo = async () => {
-    if (!user) return
-    
-    const supabase = createClient()
-    const { data } = await supabase.from("therapist_info").select("*").eq("user_id", user.id).single()
-
-    if (data) {
-      setTherapist(data)
+    const res = await getTherapistInfo()
+    if (res.success && res.data) {
+      setTherapist(res.data)
     }
   }
 
   const saveTherapistInfo = async () => {
-    if (!user) return
-    
-    const supabase = createClient()
-    const { error } = await supabase.from("therapist_info").upsert({ ...therapist, user_id: user.id })
-
-    if (error) {
+    const res = await updateTherapistInfo(therapist)
+    if (res.error) {
       toast.error("שגיאה בשמירת הנתונים")
     } else {
       toast.success("פרטי המטפל נשמרו בהצלחה")
@@ -77,69 +79,51 @@ export function EmergencyContactTab() {
   }
 
   const loadTasks = async () => {
-    if (!user) return
-    
-    const supabase = createClient()
-    const { data } = await supabase
-      .from("therapist_tasks")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-
-    if (data) setTasks(data)
+    const res = await getTherapistTasks()
+    if (res.success && res.data) setTasks(res.data)
   }
 
   const addTask = async () => {
-    if (!newTask.title || !user) return
+    if (!newTask.title) return
 
-    const supabase = createClient()
-    const { error } = await supabase.from("therapist_tasks").insert({
-      user_id: user.id,
-      title: newTask.title,
-      description: newTask.description,
-      completed: false,
-    })
+    const res = await addTherapistTask(newTask)
 
-    if (!error) {
+    if (res.success) {
       setNewTask({ title: "", description: "" })
       loadTasks()
       toast.success("משימה נוספה")
+    } else {
+      toast.error("שגיאה בהוספת משימה")
     }
   }
 
   const toggleTask = async (taskId: string, completed: boolean) => {
-    const supabase = createClient()
-    await supabase.from("therapist_tasks").update({ completed }).eq("id", taskId)
+    // Optimistic update
+    setTasks(tasks.map(t => t.id === taskId ? { ...t, completed } : t))
 
-    loadTasks()
+    const res = await toggleTherapistTask(taskId, completed)
+    if (!res.success) {
+      toast.error("שגיאה בעדכון משימה")
+      loadTasks() // Revert
+    }
   }
 
   const loadAppointments = async () => {
-    if (!user) return
-    
-    const supabase = createClient()
-    const { data } = await supabase
-      .from("appointments")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("date", { ascending: true })
-
-    if (data) setAppointments(data)
+    const res = await getAppointments()
+    if (res.success && res.data) setAppointments(res.data)
   }
 
   const addAppointment = async () => {
-    if (!newAppointment.date || !newAppointment.time || !user) return
+    if (!newAppointment.date || !newAppointment.time) return
 
-    const supabase = createClient()
-    const { error } = await supabase.from("appointments").insert({
-      user_id: user.id,
-      ...newAppointment,
-    })
+    const res = await addAppointment(newAppointment)
 
-    if (!error) {
+    if (res.success) {
       setNewAppointment({ date: "", time: "", notes: "" })
       loadAppointments()
       toast.success("פגישה נוספה")
+    } else {
+      toast.error("שגיאה בהוספת פגישה")
     }
   }
 

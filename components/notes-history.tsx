@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/neon/client"
+import { getMoodEntries } from "@/app/actions/mood-actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Calendar, FileText } from "lucide-react"
@@ -22,18 +22,20 @@ export function NotesHistory() {
 
   const loadNotes = async () => {
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from("mood_entries")
-        .select("id, notes, created_at")
-        .not("notes", "is", null)
-        .neq("notes", "")
-        .order("created_at", { ascending: false })
+      const res = await getMoodEntries()
 
-      if (error) {
-        console.error("Error loading notes:", error)
-      } else if (data) {
-        setNotesEntries(data)
+      if (res.success && res.data) {
+        // Filter entries that have notes
+        // Map 'note' from DB to 'notes'
+        const validNotes = res.data
+          .filter((e: any) => e.note && e.note.trim().length > 0)
+          .map((e: any) => ({
+            id: e.id,
+            notes: e.note,
+            created_at: e.created_at
+          }))
+
+        setNotesEntries(validNotes)
       }
     } catch (error) {
       console.error("Unexpected error:", error)

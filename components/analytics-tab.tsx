@@ -21,7 +21,7 @@ import {
 } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/neon/client"
+import { getMoodEntries } from "@/app/actions/mood-actions"
 import { NotesHistory } from "@/components/notes-history"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
@@ -48,22 +48,27 @@ export function AnalyticsTab() {
 
   const loadEntries = async () => {
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase.from("mood_entries").select("*").order("created_at", { ascending: false })
+      const res = await getMoodEntries()
 
-      if (error) {
-        // If error message indicates database not configured, silently skip (expected behavior)
-        if (error.message && error.message.includes("not configured")) {
-          console.log("[v0] Database not configured, skipping entries load")
-        } else {
-          console.error("Error loading entries:", error)
+      if (!res.success) {
+        console.error("Error loading entries:", res.error)
+        setEntries([])
+        if (res.error === "Unauthorized") {
+          // handle unauthorized
         }
-        setEntries([])
-      } else if (data && Array.isArray(data)) {
-        setEntries(data)
-        extractCustomMetrics(data)
       } else {
-        setEntries([])
+        const data = res.data || []
+        // Map DB 'note' to UI 'notes'
+        const mappedData = data.map((e: any) => ({
+          ...e,
+          notes: e.note || e.notes || "",
+          // Ensure numbers are numbers
+          mood_level: Number(e.mood_level),
+          energy_level: Number(e.energy_level),
+          stress_level: Number(e.stress_level)
+        }))
+        setEntries(mappedData)
+        extractCustomMetrics(mappedData)
       }
     } catch (error) {
       console.error("Unexpected error:", error)
@@ -237,13 +242,13 @@ export function AnalyticsTab() {
   // Prepare data for weekly bar chart
   const weeklyData = weeklyAvg
     ? [
-        {
-          week: "שבוע זה",
-          mood: weeklyAvg.mood,
-          energy: weeklyAvg.energy,
-          stress: weeklyAvg.stress,
-        },
-      ]
+      {
+        week: "שבוע זה",
+        mood: weeklyAvg.mood,
+        energy: weeklyAvg.energy,
+        stress: weeklyAvg.stress,
+      },
+    ]
     : []
 
   return (

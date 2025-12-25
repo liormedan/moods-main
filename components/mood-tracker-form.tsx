@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/neon/client"
+import { logMoodEntry } from "@/app/actions/mood-actions"
 import {
   Dialog,
   DialogContent,
@@ -149,34 +149,29 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         return
       }
 
-      const supabase = createClient()
-      const customMetrics = customSliders.map((slider) => ({
-        name: slider.name,
-        value: slider.value,
-        lowLabel: slider.lowLabel,
-        highLabel: slider.highLabel,
-        emoji: slider.emoji,
-      }))
-
-      const { error } = await supabase.from("mood_entries").insert({
-        user_id: user.id,
+      const result = await logMoodEntry({
         mood_level: moodLevel[0],
         energy_level: energyLevel[0],
         stress_level: stressLevel[0],
-        notes: notes.trim() || null,
-        custom_metrics: customMetrics,
+        notes: notes.trim(), // Server action expects string, handle null there or pass empty string
+        custom_metrics: customSliders.map((slider) => ({
+          name: slider.name,
+          value: slider.value,
+          lowLabel: slider.lowLabel,
+          highLabel: slider.highLabel,
+          emoji: slider.emoji,
+        })),
       })
 
-      if (error) {
-        // If error message indicates database not configured, show helpful message
-        if (error.message && error.message.includes("not configured")) {
+      if (!result.success) {
+        if (result.error && result.error.includes("not configured")) {
           toast({
             title: "מסד נתונים לא מוגדר",
             description: "אנא הגדר את מסד הנתונים כדי לשמור מצבי רוח.",
             variant: "destructive",
           })
         } else {
-          console.error("[v0] Error saving mood entry:", error)
+          console.error("[v0] Error saving mood entry:", result.error)
           toast({
             title: "שגיאה בשמירה",
             description: "לא הצלחנו לשמור את מצב הרוח. נסה שוב.",

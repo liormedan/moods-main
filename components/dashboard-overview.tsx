@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/neon/client"
+import { getMoodEntries } from "@/app/actions/mood-actions"
 import { ArrowLeft, TrendingUp, TrendingDown, Clock, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
 
 interface MoodEntry {
@@ -44,17 +44,11 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
 
   const loadStats = async () => {
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase.from("mood_entries").select("*").order("created_at", { ascending: false })
+      const result = await getMoodEntries()
 
-      if (error) {
-        // If error message indicates database not configured, silently skip (expected behavior)
-        if (error.message && error.message.includes("not configured")) {
-          console.log("[v0] Database not configured, skipping stats load")
-        } else {
-          console.error("[v0] Error loading stats:", error)
-        }
-        // Set empty stats when database is not available
+      if (!result.success || !result.data) {
+        // If error, set empty stats
+        // console.error("[v0] Error loading stats:", result.error) // Optional logging
         setStats({
           totalEntries: 0,
           avgMood: 0,
@@ -62,7 +56,8 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
           avgStress: 0,
           lastEntry: null,
         })
-      } else if (data && Array.isArray(data) && data.length > 0) {
+      } else if (Array.isArray(result.data) && result.data.length > 0) {
+        const data = result.data as MoodEntry[]
         const totalEntries = data.length
         const avgMood = totalEntries > 0 ? data.reduce((sum, e) => sum + e.mood_level, 0) / totalEntries : 0
         const avgEnergy = totalEntries > 0 ? data.reduce((sum, e) => sum + e.energy_level, 0) / totalEntries : 0
@@ -78,7 +73,7 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
 
         calculateEnhancedStats(data, avgMood)
       } else {
-        // No data available, set empty stats
+        // No data available
         setStats({
           totalEntries: 0,
           avgMood: 0,
@@ -89,7 +84,6 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
       }
     } catch (error) {
       console.error("[v0] Unexpected error:", error)
-      // Set empty stats on error
       setStats({
         totalEntries: 0,
         avgMood: 0,

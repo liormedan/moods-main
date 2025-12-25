@@ -32,7 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useUser } from "@clerk/nextjs"
-import { createClient } from "@/lib/neon/client"
+import { deleteAllMoodEntries, getMoodEntries } from "@/app/actions/mood-actions"
 
 interface SettingsTabProps {
   userEmail: string
@@ -58,14 +58,9 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
   const handleResetData = async () => {
     setIsResetting(true)
     try {
-      if (!user) {
-        throw new Error("משתמש לא מחובר")
-      }
+      const res = await deleteAllMoodEntries()
 
-      const supabase = createClient()
-      const { error } = await supabase.from("mood_entries").delete().eq("user_id", user.id)
-
-      if (error) throw error
+      if (!res.success) throw new Error(res.error || "Failed to delete")
 
       toast({
         title: "הנתונים אופסו בהצלחה",
@@ -83,33 +78,28 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
     }
   }
 
+  const fetchEntriesForExport = async () => {
+    const res = await getMoodEntries()
+    if (!res.success) throw new Error(res.error)
+    return res.data || []
+  }
+
   const handleExportCSV = async () => {
     setIsExporting(true)
     try {
-      if (!user) {
-        throw new Error("משתמש לא מחובר")
-      }
-
-      const supabase = createClient()
-      const { data: entries, error } = await supabase
-        .from("mood_entries")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-
-      if (error) throw error
+      const entries = await fetchEntriesForExport()
 
       const headers = ["תאריך", "מצב רוח", "אנרגיה", "לחץ", "הערות", "מדדים נוספים"]
       const csvContent = [
         headers.join(","),
-        ...(entries || []).map((entry) => {
+        ...entries.map((entry: any) => {
           const customMetrics = entry.custom_metrics ? JSON.stringify(entry.custom_metrics).replace(/,/g, ";") : ""
           return [
             new Date(entry.created_at).toLocaleString("he-IL"),
             entry.mood || "",
             entry.energy || "",
             entry.stress || "",
-            `"${(entry.notes || "").replace(/"/g, '""')}"`,
+            `"${(entry.note || "").replace(/"/g, '""')}"`, // note vs notes
             `"${customMetrics}"`,
           ].join(",")
         }),
@@ -143,18 +133,7 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
   const handleExportJSON = async () => {
     setIsExporting(true)
     try {
-      if (!user) {
-        throw new Error("משתמש לא מחובר")
-      }
-
-      const supabase = createClient()
-      const { data: entries, error } = await supabase
-        .from("mood_entries")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-
-      if (error) throw error
+      const entries = await fetchEntriesForExport()
 
       const jsonContent = JSON.stringify(entries, null, 2)
       const blob = new Blob([jsonContent], { type: "application/json" })
@@ -185,18 +164,7 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
   const handleExportPDF = async () => {
     setIsExporting(true)
     try {
-      if (!user) {
-        throw new Error("משתמש לא מחובר")
-      }
-
-      const supabase = createClient()
-      const { data: entries, error } = await supabase
-        .from("mood_entries")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-
-      if (error) throw error
+      const entries = await fetchEntriesForExport()
 
       const htmlContent = `
         <!DOCTYPE html>
@@ -233,25 +201,24 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
             <div class="summary-grid">
               <div class="summary-item">
                 <div class="label">ממוצע מצב רוח</div>
-                <div class="value">${entries && entries.length > 0 ? (entries.reduce((acc, e) => acc + (e.mood || 0), 0) / entries.length).toFixed(1) : "-"}</div>
+                <div class="value">${entries && entries.length > 0 ? (entries.reduce((acc: any, e: any) => acc + (e.mood || 0), 0) / entries.length).toFixed(1) : "-"}</div>
               </div>
               <div class="summary-item">
                 <div class="label">ממוצע אנרגיה</div>
-                <div class="value">${entries && entries.length > 0 ? (entries.reduce((acc, e) => acc + (e.energy || 0), 0) / entries.length).toFixed(1) : "-"}</div>
+                <div class="value">${entries && entries.length > 0 ? (entries.reduce((acc: any, e: any) => acc + (e.energy || 0), 0) / entries.length).toFixed(1) : "-"}</div>
               </div>
               <div class="summary-item">
                 <div class="label">ממוצע לחץ</div>
-                <div class="value">${entries && entries.length > 0 ? (entries.reduce((acc, e) => acc + (e.stress || 0), 0) / entries.length).toFixed(1) : "-"}</div>
+                <div class="value">${entries && entries.length > 0 ? (entries.reduce((acc: any, e: any) => acc + (e.stress || 0), 0) / entries.length).toFixed(1) : "-"}</div>
               </div>
             </div>
           </div>
 
           <h2>רשומות מפורטות</h2>
-          ${
-            entries && entries.length > 0
-              ? entries
-                  .map(
-                    (entry) => `
+          ${entries && entries.length > 0
+          ? entries
+            .map(
+              (entry: any) => `
             <div class="entry">
               <div class="entry-header">
                 <span class="entry-date">${new Date(entry.created_at).toLocaleDateString("he-IL", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
@@ -270,30 +237,29 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
                   <div class="metric-value">${entry.stress || "-"}</div>
                 </div>
               </div>
-              ${
-                entry.custom_metrics
+              ${entry.custom_metrics
                   ? `
               <div class="custom-metrics">
                 <strong>מדדים נוספים:</strong><br/>
                 ${Object.entries(
-                  typeof entry.custom_metrics === "string" ? JSON.parse(entry.custom_metrics) : entry.custom_metrics,
-                )
-                  .map(
-                    ([key, value]: [string, any]) =>
-                      `<span class="custom-metric">${value.name || key}: ${value.value || "-"}</span>`,
+                    typeof entry.custom_metrics === "string" ? JSON.parse(entry.custom_metrics) : entry.custom_metrics,
                   )
-                  .join("")}
+                    .map(
+                      ([key, value]: [string, any]) =>
+                        `<span class="custom-metric">${value.name || key}: ${value.value || "-"}</span>`,
+                    )
+                    .join("")}
               </div>
               `
                   : ""
-              }
-              ${entry.notes ? `<div class="notes"><strong>הערות:</strong><br/>${entry.notes.replace(/\n/g, "<br/>")}</div>` : ""}
+                }
+              ${entry.note ? `<div class="notes"><strong>הערות:</strong><br/>${entry.note.replace(/\n/g, "<br/>")}</div>` : ""}
             </div>
           `,
-                  )
-                  .join("")
-              : "<p>אין נתונים להצגה</p>"
-          }
+            )
+            .join("")
+          : "<p>אין נתונים להצגה</p>"
+        }
           
           <div class="footer">
             <p>דוח זה נוצר בתאריך ${new Date().toLocaleDateString("he-IL")}</p>
