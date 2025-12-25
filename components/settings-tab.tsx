@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useUser } from "@clerk/nextjs"
 import { createClient } from "@/lib/supabase/client"
 
 interface SettingsTabProps {
@@ -38,6 +39,7 @@ interface SettingsTabProps {
 }
 
 export function SettingsTab({ userEmail }: SettingsTabProps) {
+  const { user } = useUser()
   const [notifications, setNotifications] = useState(true)
   const [dailyReminders, setDailyReminders] = useState(true)
   const [isResetting, setIsResetting] = useState(false)
@@ -56,15 +58,11 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
   const handleResetData = async () => {
     setIsResetting(true)
     try {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
       if (!user) {
         throw new Error("משתמש לא מחובר")
       }
 
+      const supabase = createClient()
       const { error } = await supabase.from("mood_entries").delete().eq("user_id", user.id)
 
       if (error) throw error
@@ -88,15 +86,11 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
   const handleExportCSV = async () => {
     setIsExporting(true)
     try {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
       if (!user) {
         throw new Error("משתמש לא מחובר")
       }
 
+      const supabase = createClient()
       const { data: entries, error } = await supabase
         .from("mood_entries")
         .select("*")
@@ -149,15 +143,11 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
   const handleExportJSON = async () => {
     setIsExporting(true)
     try {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
       if (!user) {
         throw new Error("משתמש לא מחובר")
       }
 
+      const supabase = createClient()
       const { data: entries, error } = await supabase
         .from("mood_entries")
         .select("*")
@@ -195,15 +185,11 @@ export function SettingsTab({ userEmail }: SettingsTabProps) {
   const handleExportPDF = async () => {
     setIsExporting(true)
     try {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
       if (!user) {
         throw new Error("משתמש לא מחובר")
       }
 
+      const supabase = createClient()
       const { data: entries, error } = await supabase
         .from("mood_entries")
         .select("*")

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Phone, MessageCircle, AlertCircle, MessageSquare, Calendar, CheckCircle, Mail } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { useUser } from "@clerk/nextjs"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
@@ -34,6 +35,7 @@ interface Appointment {
 }
 
 export function EmergencyContactTab() {
+  const { user } = useUser()
   const [therapist, setTherapist] = useState<TherapistInfo>({
     name: "",
     phone: "",
@@ -51,12 +53,9 @@ export function EmergencyContactTab() {
   }, [])
 
   const loadTherapistInfo = async () => {
-    const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
     if (!user) return
-
+    
+    const supabase = createClient()
     const { data } = await supabase.from("therapist_info").select("*").eq("user_id", user.id).single()
 
     if (data) {
@@ -65,12 +64,9 @@ export function EmergencyContactTab() {
   }
 
   const saveTherapistInfo = async () => {
-    const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
     if (!user) return
-
+    
+    const supabase = createClient()
     const { error } = await supabase.from("therapist_info").upsert({ ...therapist, user_id: user.id })
 
     if (error) {
@@ -81,12 +77,9 @@ export function EmergencyContactTab() {
   }
 
   const loadTasks = async () => {
-    const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
     if (!user) return
-
+    
+    const supabase = createClient()
     const { data } = await supabase
       .from("therapist_tasks")
       .select("*")
@@ -97,14 +90,9 @@ export function EmergencyContactTab() {
   }
 
   const addTask = async () => {
-    if (!newTask.title) return
+    if (!newTask.title || !user) return
 
     const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) return
-
     const { error } = await supabase.from("therapist_tasks").insert({
       user_id: user.id,
       title: newTask.title,
@@ -127,12 +115,9 @@ export function EmergencyContactTab() {
   }
 
   const loadAppointments = async () => {
-    const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
     if (!user) return
-
+    
+    const supabase = createClient()
     const { data } = await supabase
       .from("appointments")
       .select("*")
@@ -143,14 +128,9 @@ export function EmergencyContactTab() {
   }
 
   const addAppointment = async () => {
-    if (!newAppointment.date || !newAppointment.time) return
+    if (!newAppointment.date || !newAppointment.time || !user) return
 
     const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) return
-
     const { error } = await supabase.from("appointments").insert({
       user_id: user.id,
       ...newAppointment,

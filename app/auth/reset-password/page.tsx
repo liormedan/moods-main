@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { useUser, useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,18 +17,15 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { user } = useUser()
+  const { user: clerkUser } = useClerk()
 
   useEffect(() => {
-    // בדיקה שהמשתמש הגיע דרך לינק איפוס תקין
-    const checkSession = async () => {
-      const supabase = createClient()
-      const { data } = await supabase.auth.getSession()
-      if (!data.session) {
-        router.push("/")
-      }
+    // בדיקה שהמשתמש מחובר
+    if (!user && !clerkUser) {
+      router.push("/")
     }
-    checkSession()
-  }, [router])
+  }, [user, clerkUser, router])
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,15 +44,12 @@ export default function ResetPasswordPage() {
       return
     }
 
-    const supabase = createClient()
-
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      })
+      if (!user) {
+        throw new Error("משתמש לא מחובר")
+      }
 
-      if (error) throw error
-
+      await user.update({ password })
       setSuccess(true)
       setTimeout(() => {
         router.push("/")

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import { useUser } from "@clerk/nextjs"
 import { createClient } from "@/lib/supabase/client"
 import {
   Dialog,
@@ -138,10 +139,7 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
     setIsSubmitting(true)
 
     try {
-      const supabase = createClient()
-      const { data: userData, error: userError } = await supabase.auth.getUser()
-
-      if (userError || !userData?.user) {
+      if (!user) {
         toast({
           title: "שגיאה",
           description: "נדרש להיות מחובר כדי לשמור מצב רוח",
@@ -150,6 +148,7 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         return
       }
 
+      const supabase = createClient()
       const customMetrics = customSliders.map((slider) => ({
         name: slider.name,
         value: slider.value,
@@ -159,7 +158,7 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
       }))
 
       const { error } = await supabase.from("mood_entries").insert({
-        user_id: userData.user.id,
+        user_id: user.id,
         mood_level: moodLevel[0],
         energy_level: energyLevel[0],
         stress_level: stressLevel[0],

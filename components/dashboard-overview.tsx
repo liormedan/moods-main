@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { useUser } from "@clerk/nextjs"
 import { createClient } from "@/lib/supabase/client"
 import { ArrowLeft, TrendingUp, TrendingDown, Clock, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
 
