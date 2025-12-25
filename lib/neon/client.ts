@@ -2,12 +2,19 @@
 // TODO: Replace with actual Neon client when database is set up
 // For now, this is a placeholder that won't crash the app
 
+// Track if we've already warned about missing database URL (to avoid spam)
+let hasWarnedAboutDatabase = false
+
 export function createClient() {
   const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
 
   // Return mock client if env vars are missing
   if (!databaseUrl) {
-    console.warn("Neon database URL is not set. Database features will not work.")
+    // Only warn once per session to avoid console spam
+    if (!hasWarnedAboutDatabase && typeof window !== 'undefined') {
+      hasWarnedAboutDatabase = true
+      console.warn("Neon database URL is not set. Database features will not work.")
+    }
     return createMockClient()
   }
 
@@ -15,7 +22,11 @@ export function createClient() {
   // Example: import { neon } from '@neondatabase/serverless'
   // return neon(databaseUrl)
   
-  console.warn("Neon client not yet implemented. Using mock client.")
+  // Only warn once if client not implemented
+  if (!hasWarnedAboutDatabase && typeof window !== 'undefined') {
+    hasWarnedAboutDatabase = true
+    console.warn("Neon client not yet implemented. Using mock client.")
+  }
   return createMockClient()
 }
 
