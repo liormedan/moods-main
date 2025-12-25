@@ -46,6 +46,7 @@ const PRESET_SLIDERS = [
 ]
 
 export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
+  const { user } = useUser()
   const [moodLevel, setMoodLevel] = useState([5])
   const [energyLevel, setEnergyLevel] = useState([5])
   const [stressLevel, setStressLevel] = useState([5])
