@@ -1,10 +1,7 @@
 {
-  "buildCommand": "pnpm run build",
+  "buildCommand": "pnpm run vercel-build",
   "devCommand": "pnpm run dev",
   "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "scripts": {
-    "test-db": "pnpm tsx scripts/test-database.ts"
-  }
+  "framework": "nextjs"
 }
 
