@@ -1,0 +1,10 @@
+{
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "scripts": {
+    "test-db": "pnpm tsx scripts/test-database.ts"
+  }
+}
+
