@@ -25,6 +25,7 @@ function createMockClient() {
   
   // Create a chainable query builder that supports all Supabase-like methods
   const createMockQueryBuilder = () => {
+    // Builder returned from select() - supports order() and eq()
     const selectBuilder = {
       order: () => mockResult,
       eq: () => ({
@@ -32,6 +33,11 @@ function createMockClient() {
         single: () => mockResult,
         order: () => mockResult,
       }),
+    }
+    
+    // Builder returned from eq() after select() - supports order()
+    const selectEqBuilder = {
+      order: () => mockResult,
     }
     
     const builder = {
@@ -46,7 +52,7 @@ function createMockClient() {
       upsert: () => mockResult,
       order: () => mockResult,
       eq: () => ({
-        select: () => mockResult,
+        select: () => selectEqBuilder, // Return builder that supports order()
         single: () => mockResult,
         upsert: () => mockResult,
         delete: () => mockResult,
