@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useUser } from "@clerk/nextjs"
 import { getMoodEntries } from "@/app/actions/mood-actions"
 import { ArrowLeft, TrendingUp, TrendingDown, Clock, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
 

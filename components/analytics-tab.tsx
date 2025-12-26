@@ -20,7 +20,6 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
-import { useUser } from "@clerk/nextjs"
 import { getMoodEntries } from "@/app/actions/mood-actions"
 import { NotesHistory } from "@/components/notes-history"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"

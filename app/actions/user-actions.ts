@@ -1,19 +1,14 @@
 'use server'
 
 import { createClient } from "@/lib/neon/client"
-import { auth } from "@clerk/nextjs/server"
 
 // --- Settings & Profile ---
 
 export async function getSettings() {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { data, error } = await client.from("user_settings")
-            .select("*")
-            .eq("user_id", userId) as any
+            .select("*") as any
 
         if (error) {
             console.error("Error fetching settings:", error)
@@ -29,12 +24,9 @@ export async function getSettings() {
 
 export async function updateSettings(settings: any) {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { error } = await client.from("user_settings").upsert({
-            user_id: userId,
+            user_id: null,
             ...settings,
             updated_at: new Date().toISOString()
         }) as any
@@ -55,13 +47,9 @@ export async function updateSettings(settings: any) {
 
 export async function getEmergencyContacts() {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { data, error } = await client.from("emergency_contacts")
             .select("*")
-            .eq("user_id", userId)
             .order("created_at", { ascending: true }) as any
 
         if (error) {
@@ -78,12 +66,9 @@ export async function getEmergencyContacts() {
 
 export async function addEmergencyContact(contact: any) {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { error } = await client.from("emergency_contacts").insert({
-            user_id: userId,
+            user_id: null,
             ...contact
         }) as any
 
@@ -101,11 +86,8 @@ export async function addEmergencyContact(contact: any) {
 
 export async function deleteEmergencyContact(contactId: string) {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
-        const { error } = await client.from("emergency_contacts").delete().eq("id", contactId).eq("user_id", userId) as any
+        const { error } = await client.from("emergency_contacts").delete().eq("id", contactId) as any
 
         if (error) {
             console.error("Error deleting contact:", error)
@@ -123,13 +105,9 @@ export async function deleteEmergencyContact(contactId: string) {
 
 export async function getTherapistInfo() {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { data, error } = await client.from("therapist_info")
-            .select("*")
-            .eq("user_id", userId) as any
+            .select("*") as any
 
         if (error) {
             console.error("Error fetching therapist info:", error)
@@ -145,12 +123,9 @@ export async function getTherapistInfo() {
 
 export async function updateTherapistInfo(info: any) {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { error } = await client.from("therapist_info").upsert({
-            user_id: userId,
+            user_id: null,
             ...info,
             updated_at: new Date().toISOString()
         }) as any
@@ -171,13 +146,9 @@ export async function updateTherapistInfo(info: any) {
 
 export async function getTherapistTasks() {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { data, error } = await client.from("therapist_tasks")
             .select("*")
-            .eq("user_id", userId)
             .order("created_at", { ascending: false }) as any
 
         if (error) {
@@ -194,12 +165,9 @@ export async function getTherapistTasks() {
 
 export async function addTherapistTask(task: any) {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { error } = await client.from("therapist_tasks").insert({
-            user_id: userId,
+            user_id: null,
             ...task
         }) as any
 
@@ -217,14 +185,10 @@ export async function addTherapistTask(task: any) {
 
 export async function toggleTherapistTask(taskId: string, isCompleted: boolean) {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { error } = await client.from("therapist_tasks")
             .update({ is_completed: isCompleted })
-            .eq("id", taskId)
-            .eq("user_id", userId) as any
+            .eq("id", taskId) as any
 
         if (error) {
             console.error("Error toggling task:", error)
@@ -242,13 +206,9 @@ export async function toggleTherapistTask(taskId: string, isCompleted: boolean) 
 
 export async function getAppointments() {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { data, error } = await client.from("appointments")
             .select("*")
-            .eq("user_id", userId)
             .order("date", { ascending: true }) as any
 
         if (error) {
@@ -265,12 +225,9 @@ export async function getAppointments() {
 
 export async function addAppointment(appointment: any) {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
         const { error } = await client.from("appointments").insert({
-            user_id: userId,
+            user_id: null,
             ...appointment
         }) as any
 

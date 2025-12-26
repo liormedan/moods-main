@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { useUser } from "@clerk/nextjs"
 import { logMoodEntry } from "@/app/actions/mood-actions"
 import {
   Dialog,
@@ -46,7 +45,6 @@ const PRESET_SLIDERS = [
 ]
 
 export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
-  const { user } = useUser()
   const [moodLevel, setMoodLevel] = useState([5])
   const [energyLevel, setEnergyLevel] = useState([5])
   const [stressLevel, setStressLevel] = useState([5])
@@ -140,15 +138,6 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
     setIsSubmitting(true)
 
     try {
-      if (!user) {
-        toast({
-          title: "שגיאה",
-          description: "נדרש להיות מחובר כדי לשמור מצב רוח",
-          variant: "destructive",
-        })
-        return
-      }
-
       const result = await logMoodEntry({
         mood_level: moodLevel[0],
         energy_level: energyLevel[0],

@@ -1,15 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { auth } from "@clerk/nextjs/server"
 import { Resend } from "resend"
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { to, subject, message } = await request.json()
 
     // בדוק אם יש API key לפני יצירת Resend

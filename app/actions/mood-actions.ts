@@ -1,21 +1,14 @@
 'use server'
 
 import { createClient } from "@/lib/neon/client"
-import { auth, currentUser } from "@clerk/nextjs/server"
 
 export async function getMoodEntries() {
     try {
-        const { userId } = await auth()
-
-        if (!userId) {
-            return { success: false, error: "Unauthorized" }
-        }
 
         const client = createClient()
-        // Filter by user_id
+        // Get all entries (no user filtering)
         const { data, error } = await client.from("mood_entries")
             .select("*")
-            .eq("user_id", userId) // Assuming .eq is supported or we implement it
             .order("created_at", { ascending: false }) as any
 
         // Note: Our manual client.ts might not support .eq().select() chaining perfectly 
@@ -66,71 +59,13 @@ export async function logMoodEntry(formData: {
     custom_metrics: any[]
 }) {
     try {
-        const user = await currentUser()
-
-        if (!user) {
-            return { success: false, error: "Unauthorized" }
-        }
-
         const client = createClient()
 
-        // 1. Sync User (Upsert)
-        // We need to ensure the user exists. 
-        // Our client.ts abstraction is too weak for "INSERT ... ON CONFLICT".
-        // We should probably expose a raw query method or extend the client.
-        // Extending the client is cleaner.
-
-        // For now, let's try to use a specialized method if we add it, or just use the `pool` directly if we exported it?
-        // client.ts only exports `createClient`.
-
-        // Let's add a `rpc` or `raw` method to client.ts? 
-        // Or just make `createClient` return the pool? 
-        // No, `createClient` returns the mock/wrapper.
-
-        // Let's rely on `client.from('users').upsert(...)`?
-        // Our current client only supports `select`.
-
-        // RE-PLAN: I need to upgrade `client.ts` to support `insert` and `upsert` (or at least `insert` with raw query support).
-        // I will write the logic here assuming `client.ts` will have `upsertUser` and `insertMood`.
-        // Actually, let's just make `client.ts` expose a `sql` tag function or similar?
-        // Or simply add `upsert` support to the builder.
-
-        // Let's stick to the plan: Sync User.
-        // I will use a helper `ensureUserExists` that I will assume works or impl in client.ts.
-
-        // Let's Modify `client.ts` first? 
-        // No, I'm already editing this file.
-        // I'll write the code here assuming I'll fix client.ts immediately after.
-
-        // Wait, I can't write invalid code that won't compile if I want to run verification.
-        // I should probably update `client.ts` FIRST.
-        // But I'm already in this tool call.
-
-        // Let's cancel this tool call? No, I can't.
-        // I will write standard Supabase-like syntax here:
-        // supabase.from('users').upsert({...})
-        // supabase.from('mood_entries').insert({...})
-
-        // And then I will go and implement those methods in `client.ts`.
-
-        // Upsert User
-        const { error: userError } = await client.from("users").upsert({
-            id: user.id,
-            email: user.emailAddresses[0]?.emailAddress,
-            name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.username || 'Unknown',
-            created_at: new Date().toISOString() // This might be ignored on update if we handle it right
-        }) as any
-
-        if (userError) {
-            console.error("Error syncing user:", userError)
-            return { success: false, error: "Failed to sync user" }
-        }
-
-        // Insert Mood
+        // Insert Mood (no user authentication)
         // Map 'notes' from form to 'note' in DB
         const { notes, ...rest } = formData
         const { error: moodError } = await client.from("mood_entries").insert({
-            user_id: user.id,
+            user_id: null, // No user ID needed
             note: notes,
             ...rest
         }) as any
@@ -150,11 +85,8 @@ export async function logMoodEntry(formData: {
 
 export async function deleteAllMoodEntries() {
     try {
-        const { userId } = await auth()
-        if (!userId) return { success: false, error: "Unauthorized" }
-
         const client = createClient()
-        const { error } = await client.from("mood_entries").delete().eq("user_id", userId) as any
+        const { error } = await client.from("mood_entries").delete() as any
 
         if (error) {
             console.error("Error deleting all moods:", error)

@@ -3,6 +3,9 @@ import { Pool } from '@neondatabase/serverless'
 // Track warning state
 let hasWarnedAboutDatabase = false
 
+// Singleton pool instance
+let pool: Pool | null = null
+
 export function createClient() {
   const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
 
@@ -14,7 +17,10 @@ export function createClient() {
     return createMockClient()
   }
 
-  const pool = new Pool({ connectionString: databaseUrl })
+  // Initialize singleton pool if not exists
+  if (!pool) {
+    pool = new Pool({ connectionString: databaseUrl })
+  }
 
   return {
     from: (table: string) => {
@@ -74,6 +80,12 @@ export function createClient() {
         then: (resolve: (value: any) => void, reject: (reason: any) => void) => {
           let sql = ''
           let params: any[] = []
+
+          // Use the singleton pool
+          if (!pool) {
+            resolve({ data: null, error: { message: "Database connection failed" } })
+            return
+          }
 
           try {
             if (type === 'SELECT') {
@@ -139,18 +151,18 @@ export function createClient() {
             pool.query(sql, params)
               .then(res => {
                 resolve({ data: res.rows, error: null })
-                pool.end()
+                // Do NOT close the pool here (serverless singleton)
               })
               .catch(err => {
                 console.error("DB Error:", err)
                 resolve({ data: null, error: err })
-                pool.end()
+                // Do NOT close the pool here
               })
 
           } catch (err) {
             console.error("Builder Error:", err)
             resolve({ data: null, error: err })
-            pool.end()
+            // Do NOT close the pool here
           }
         }
       }

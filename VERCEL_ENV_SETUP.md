@@ -2,26 +2,7 @@
 
 ## בעיות נפוצות ופתרונות
 
-### 1. ⚠️ Clerk Development Keys Warning
-
-**הבעיה:**
-```
-Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits...
-```
-
-**פתרון:**
-1. היכנס ל-[Clerk Dashboard](https://dashboard.clerk.com/)
-2. בחר את הפרויקט שלך
-3. לך ל-API Keys
-4. העתק את ה-**Production** keys (לא Test keys!)
-5. ב-Vercel:
-   - לך ל-Project Settings → Environment Variables
-   - הוסף:
-     - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` = `pk_live_...` (לא `pk_test_...`)
-     - `CLERK_SECRET_KEY` = `sk_live_...` (לא `sk_test_...`)
-   - ודא שהמשתנים מוגדרים עבור **Production** environment
-
-### 2. ⚠️ Neon Database URL Not Set
+### 1. ⚠️ Neon Database URL Not Set
 
 **הבעיה:**
 ```
@@ -39,7 +20,7 @@ Neon database URL is not set. Database features will not work.
    - העתק את ה-Connection String
    - ודא שמוגדר עבור **Production** environment
 
-### 3. ℹ️ Zustand Deprecated Warning
+### 2. ℹ️ Zustand Deprecated Warning
 
 **הבעיה:**
 ```
@@ -51,10 +32,6 @@ Neon database URL is not set. Database features will not work.
 ---
 
 ## סיכום - מה צריך לעשות עכשיו:
-
-### ✅ חובה (לפני פריסה ל-production):
-- [ ] הגדר `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (production) ב-Vercel
-- [ ] הגדר `CLERK_SECRET_KEY` (production) ב-Vercel
 
 ### 📝 אופציונלי (אפשר להוסיף מאוחר יותר):
 - [ ] הגדר `DATABASE_URL` או `NEON_DATABASE_URL` ב-Vercel (כשתכין את הדאטה בייס)
@@ -71,9 +48,7 @@ pnpm run check:env
 ```
 
 הסקריפט יבדוק:
-- ✅ האם כל המשתנים הנדרשים מוגדרים
-- ⚠️ האם אתה משתמש ב-development keys ב-production
-- ℹ️ האם משתנים אופציונליים מוגדרים
+- ℹ️ האם משתנים אופציונליים מוגדרים (Database, Resend)
 
 ## איך להוסיף משתני סביבה ב-Vercel:
 
@@ -94,5 +69,5 @@ pnpm run check:env
 1. לך ל-Deployments ב-Vercel
 2. לחץ על ה-3 נקודות של הדיפלוי האחרון
 3. בחר **Redeploy**
-4. בדוק את הלוגים - האזהרות על Clerk development keys צריכות להיעלם
+4. בדוק את הלוגים - האפליקציה אמורה לעבוד ללא שגיאות
 

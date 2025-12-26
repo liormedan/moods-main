@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Phone, MessageCircle, AlertCircle, MessageSquare, Calendar, CheckCircle, Mail } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { useUser } from "@clerk/nextjs"
 import { toast } from "sonner"
 import {
   getTherapistInfo,
@@ -43,7 +42,6 @@ interface Appointment {
 }
 
 export function EmergencyContactTab() {
-  const { user } = useUser()
   const [therapist, setTherapist] = useState<TherapistInfo>({
     name: "",
     phone: "",
@@ -55,12 +53,10 @@ export function EmergencyContactTab() {
   const [newAppointment, setNewAppointment] = useState({ date: "", time: "", notes: "" })
 
   useEffect(() => {
-    if (user) {
-      loadTherapistInfo()
-      loadTasks()
-      loadAppointments()
-    }
-  }, [user])
+    loadTherapistInfo()
+    loadTasks()
+    loadAppointments()
+  }, [])
 
   const loadTherapistInfo = async () => {
     const res = await getTherapistInfo()

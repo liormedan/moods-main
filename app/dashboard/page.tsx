@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useUser, useClerk } from "@clerk/nextjs"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { MoodTrackerForm } from "@/components/mood-tracker-form"
 import { AnalyticsTab } from "@/components/analytics-tab"
@@ -19,21 +18,9 @@ export default function DashboardPage() {
   const [isMoodDialogOpen, setIsMoodDialogOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const router = useRouter()
-  const { user, isLoaded } = useUser()
-  const { signOut } = useClerk()
 
   const handleSignOut = async () => {
-    await signOut()
     router.push("/")
-  }
-
-  if (!isLoaded) {
-    return <div className="min-h-svh flex items-center justify-center">טוען...</div>
-  }
-
-  if (!user) {
-    router.push("/login")
-    return null
   }
 
   const sidebarItems = [
@@ -50,7 +37,7 @@ export default function DashboardPage() {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-3 py-3 md:hidden safe-top">
         <div className="flex items-center justify-between gap-3 max-w-full">
           <div className="flex-1 min-w-0 text-right">
-            <h1 className="text-lg font-bold truncate">שלום, {user.primaryEmailAddress?.emailAddress?.split("@")[0]}!</h1>
+            <h1 className="text-lg font-bold truncate">שלום!</h1>
             <p className="text-xs text-muted-foreground">איך אתה מרגיש היום?</p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
@@ -58,7 +45,7 @@ export default function DashboardPage() {
               <ThemeToggle />
             </div>
             <div className="rounded-lg border border-border bg-card/50">
-              <UserProfileMenu email={user.primaryEmailAddress?.emailAddress || ""} createdAt={user.createdAt?.toISOString() || ""} onSignOut={handleSignOut} />
+              <UserProfileMenu email="" createdAt="" onSignOut={handleSignOut} />
             </div>
           </div>
         </div>
@@ -119,8 +106,8 @@ export default function DashboardPage() {
             </div>
             <div className={cn("w-full", isSidebarCollapsed && "flex justify-center")}>
               <UserProfileMenu
-                email={user.primaryEmailAddress?.emailAddress || ""}
-                createdAt={user.createdAt?.toISOString() || ""}
+                email=""
+                createdAt=""
                 onSignOut={handleSignOut}
                 compact={isSidebarCollapsed}
               />
@@ -132,22 +119,18 @@ export default function DashboardPage() {
         <main
           className={cn("flex-1 overflow-y-auto transition-all duration-300", isSidebarCollapsed ? "pr-20" : "pr-64")}
         >
-          <div className="fixed top-4 left-4 z-30">
-            <UserProfileMenu email={user.email || ""} createdAt={user.created_at} onSignOut={handleSignOut} />
-          </div>
-
           <div className="p-6 md:p-10">
             <div className="mx-auto max-w-6xl">
               <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold">שלום, {user.primaryEmailAddress?.emailAddress?.split("@")[0]}!</h1>
+                <h1 className="text-3xl font-bold">שלום!</h1>
                 <p className="text-muted-foreground mt-1">איך אתה מרגיש היום?</p>
               </div>
 
               {/* Content */}
               {activeTab === "overview" && (
                 <DashboardOverview
-                  userEmail={user.primaryEmailAddress?.emailAddress || ""}
-                  userId={user.id}
+                  userEmail=""
+                  userId=""
                   onNavigateToReport={() => setActiveTab("report")}
                 />
               )}
@@ -158,11 +141,11 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {activeTab === "analytics" && <AnalyticsTab userId={user.id} />}
+              {activeTab === "analytics" && <AnalyticsTab />}
 
               {activeTab === "emergency" && <EmergencyContactTab />}
 
-              {activeTab === "settings" && <SettingsTab userEmail={user.email || ""} />}
+              {activeTab === "settings" && <SettingsTab userEmail="" />}
             </div>
           </div>
         </main>
@@ -188,8 +171,8 @@ export default function DashboardPage() {
         <div className="mx-auto max-w-7xl px-3">
           {activeTab === "overview" && (
             <DashboardOverview
-              userEmail={user.email || ""}
-              userId={user.id}
+              userEmail=""
+              userId=""
               onNavigateToReport={() => setActiveTab("report")}
             />
           )}
@@ -200,11 +183,11 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {activeTab === "analytics" && <AnalyticsTab userId={user.id} />}
+          {activeTab === "analytics" && <AnalyticsTab />}
 
           {activeTab === "emergency" && <EmergencyContactTab />}
 
-          {activeTab === "settings" && <SettingsTab userEmail={user.email || ""} />}
+          {activeTab === "settings" && <SettingsTab userEmail="" />}
         </div>
       </div>
 

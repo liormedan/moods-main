@@ -14,7 +14,6 @@
     "vercel-build": "pnpm test:all && pnpm run build"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.36.5",
     "@editorjs/checklist": "1.6.0",
     "@editorjs/editorjs": "2.31.0",
     "@editorjs/header": "2.8.8",

@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Heebo } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { ClerkProvider } from "@clerk/nextjs"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 
@@ -58,16 +57,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="he" dir="rtl">
-        <body className={`${heebo.variable} font-sans antialiased`}>
-          {children}
-          {process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_VERCEL_ENV && (
-            <Analytics />
-          )}
-          <Toaster />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="he" dir="rtl">
+      <body className={`${heebo.variable} font-sans antialiased`}>
+        {children}
+        {process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_VERCEL_ENV && (
+          <Analytics />
+        )}
+        <Toaster />
+      </body>
+    </html>
   )
 }

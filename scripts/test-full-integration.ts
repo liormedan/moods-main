@@ -3,9 +3,8 @@
  * Full Integration Test Script
  * 
  * This script tests the complete application flow:
- * 1. Authentication via Clerk
- * 2. All database operations through the actual application logic
- * 3. Integration between auth and database
+ * 1. All database operations through the actual application logic
+ * 2. Integration tests
  * 
  * Run with: pnpm tsx scripts/test-full-integration.ts
  */
@@ -33,85 +32,46 @@ function logTest(testName: string, passed: boolean, error?: string, details?: an
   }
 }
 
-// Test 1: Check Clerk environment variables
-async function testClerkConfig() {
-  try {
-    const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-    const secretKey = process.env.CLERK_SECRET_KEY
-
-    if (!publishableKey || !secretKey) {
-      logTest("Clerk Configuration", true, undefined, {
-        status: "Not configured (expected in test environment)",
-        hasPublishableKey: !!publishableKey,
-        hasSecretKey: !!secretKey,
-        note: "Clerk keys should be set in production/Vercel environment"
-      })
-      return true // Don't fail the test, just warn
-    }
-
-    // Check if keys are development keys (expected in dev)
-    const isDevKey = publishableKey.includes("pk_test") || secretKey.includes("sk_test")
-    
-    logTest("Clerk Configuration", true, undefined, {
-      hasPublishableKey: true,
-      hasSecretKey: true,
-      keyType: isDevKey ? "development" : "production",
-      note: isDevKey ? "Using development keys (expected in dev)" : "Using production keys"
-    })
-    return true
-  } catch (error: any) {
-    logTest("Clerk Configuration", false, error.message)
-    return false
-  }
-}
-
-// Test 2: Test database client creation with user context
-async function testDatabaseClientWithUser() {
+// Test 1: Test database client creation
+async function testDatabaseClient() {
   try {
     const client = createClient()
     
-    // Simulate authenticated user
-    const testUserId = "test-user-123"
-    
-    // Test: Load mood entries for user
+    // Test: Load mood entries
     const loadResult = await client
       .from("mood_entries")
       .select("*")
-      .eq("user_id", testUserId)
       .order("created_at", { ascending: false })
 
     if (loadResult.error && loadResult.error.message?.includes("not configured")) {
-      logTest("Database: Load user mood entries", true, undefined, {
-        status: "Mock client (expected - no database configured)",
-        userId: testUserId
+      logTest("Database: Load mood entries", true, undefined, {
+        status: "Mock client (expected - no database configured)"
       })
       return true
     }
 
     if (loadResult.error) {
-      logTest("Database: Load user mood entries", false, loadResult.error.message)
+      logTest("Database: Load mood entries", false, loadResult.error.message)
       return false
     }
 
-    logTest("Database: Load user mood entries", true, undefined, {
-      userId: testUserId,
+    logTest("Database: Load mood entries", true, undefined, {
       entriesFound: Array.isArray(loadResult.data) ? loadResult.data.length : 0
     })
     return true
   } catch (error: any) {
-    logTest("Database: Load user mood entries", false, error.message)
+    logTest("Database: Load mood entries", false, error.message)
     return false
   }
 }
 
-// Test 3: Test creating mood entry (simulating form submission)
+// Test 2: Test creating mood entry (simulating form submission)
 async function testCreateMoodEntry() {
   try {
     const client = createClient()
-    const testUserId = "test-user-123"
     
     const moodEntry = {
-      user_id: testUserId,
+      user_id: null,
       mood_level: 7,
       energy_level: 6,
       stress_level: 3,
@@ -366,19 +326,14 @@ async function runAllTests() {
   console.log("🧪 Starting Full Integration Tests...")
   console.log("=" .repeat(60))
   console.log("\nThis test simulates the complete application flow:")
-  console.log("  - Authentication via Clerk")
   console.log("  - All database operations through actual components")
-  console.log("  - Integration between auth and database\n")
+  console.log("  - Integration tests\n")
   console.log("=" .repeat(60))
   
   // Check environment
   console.log(`\n📋 Environment Check:`)
-  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-  const clerkSecret = process.env.CLERK_SECRET_KEY
   const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
   
-  console.log(`   Clerk Publishable Key: ${clerkPubKey ? "✅ Set" : "❌ Not set"}`)
-  console.log(`   Clerk Secret Key: ${clerkSecret ? "✅ Set" : "❌ Not set"}`)
   console.log(`   Database URL: ${databaseUrl ? "✅ Set" : "❌ Not set"}`)
   
   if (!databaseUrl) {
@@ -389,8 +344,7 @@ async function runAllTests() {
   console.log("Running Integration Tests:\n")
   
   // Run tests
-  await testClerkConfig()
-  await testDatabaseClientWithUser()
+  await testDatabaseClient()
   await testCreateMoodEntry()
   await testLoadAnalyticsData()
   await testLoadDashboardStats()

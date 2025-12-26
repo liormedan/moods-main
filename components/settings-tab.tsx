@@ -31,7 +31,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { useUser } from "@clerk/nextjs"
 import { deleteAllMoodEntries, getMoodEntries } from "@/app/actions/mood-actions"
 
 interface SettingsTabProps {
@@ -39,7 +38,6 @@ interface SettingsTabProps {
 }
 
 export function SettingsTab({ userEmail }: SettingsTabProps) {
-  const { user } = useUser()
   const [notifications, setNotifications] = useState(true)
   const [dailyReminders, setDailyReminders] = useState(true)
   const [isResetting, setIsResetting] = useState(false)
