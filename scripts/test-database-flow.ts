@@ -10,14 +10,14 @@ async function main() {
   console.log("🚀 Starting Full Database Integration Flow Test...")
 
   const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-  const testUserId = `test_user_integration_${Date.now()}` // Mock Clerk ID
+  const testUserId = `test_user_integration_${Date.now()}`
   const testEmail = `test_${Date.now()}@example.com`
   let testEntryId: string | null = null
 
   try {
     // 0. CREATE USER (Prerequisite)
     console.log(`\n0. Creating temporary user: ${testUserId}...`)
-    // Depending on schema, we might need more fields. Assuming minimal typical Clerk mirror.
+    // Create test user for integration testing
     // If it fails, we will see the error constraints.
     await pool.query(`
       INSERT INTO users (id, email, name, created_at)

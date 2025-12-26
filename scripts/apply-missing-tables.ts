@@ -17,13 +17,7 @@ const pool = new Pool({ connectionString: databaseUrl });
 const sql003 = `
 -- Ensure users table exists (referenced by others)
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY, -- Clerk user ID is text usually, but here we cast/store? No, Clerk IDs are 'user_...' string. 
-  -- WAIT. Clerk IDs are STRINGS (Text). UUID is likely wrong if we store Clerk ID directly.
-  -- user-actions.ts upserts id: user.id. 
-  -- If user.id is 'user_2xxx', it is NOT a UUID.
-  -- But test-database.ts uses UUID for test.
-  -- If the app uses Clerk IDs, column type must be TEXT.
-  -- Let's check user-actions usages.
+  id TEXT PRIMARY KEY,
   email TEXT,
   name TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -33,11 +27,9 @@ CREATE TABLE IF NOT EXISTS users (
 -- We need to check if users.id is UUID or TEXT. 
 -- In 001, mood_entries.user_id is UUID. 
 -- This implies existing code expects UUIDs. 
--- Does Clerk provide UUIDs? No.
 -- Maybe the user has a mapping or just generates UUIDs?
 -- user-actions.ts passes user.id directly. 
 -- If user.id is string 'user_...', insert into UUID column will FAIL.
--- This indicates a FUNDAMENTAL TYPE MISMATCH if user.id is standard Clerk ID.
 -- However, if 001 exists and has UUID, then maybe test-database.ts failed with "invalid input syntax for type uuid" precisely because it tried to use "test-user-id".
 -- BUT "2222..." works.
 -- If the real app sends "user_abc123", it will fail UUID check.
@@ -49,9 +41,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- If 001 is UUID, then 003 should be UUID?
 -- Loophole: Maybe user.id IS a UUID in their system?
 -- Or maybe they use a hashing function? user_actions.ts doesn't show one.
--- I will use TEXT for user_id to be safe with Clerk, but 001 uses UUID.
 -- If I use TEXT, I cannot reference users(id) if users(id) is UUID.
--- I'll define users(id) as TEXT to support Clerk.
 -- But 001 expects UUID.
 -- Let's stick to TEXT for new tables mostly?
 -- No, consistency.
@@ -66,7 +56,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- I'll use UUID for consistency with previous scripts.
 
 CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY, -- Changing to TEXT because Clerk IDs are text.
+  id TEXT PRIMARY KEY,
   email TEXT,
   name TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -74,11 +64,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Note: mood_entries.user_id is UUID in 001.
--- If I make therapist_info.user_id TEXT, it's safer for Clerk.
 -- But consistency?
 -- If I change it to TEXT, it won't link to mood_entries if I wanted to join.
 -- But I don't join them.
--- I will use TEXT for user_id in new tables. It is much safer for Clerk.
 
 -- טבלת פרטי מטפל
 CREATE TABLE IF NOT EXISTS therapist_info (
