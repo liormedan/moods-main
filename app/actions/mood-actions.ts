@@ -1,8 +1,15 @@
 'use server'
 
+import { moodsApi } from "@/lib/api/moods"
+
 export async function getMoodEntries() {
-    console.warn("getMoodEntries: Backend is being migrated. Returning empty list.");
-    return { success: true, data: [] }
+    try {
+        const data = await moodsApi.getAll()
+        return { success: true, data }
+    } catch (e: any) {
+        console.error("getMoodEntries Error:", e)
+        return { success: false, error: e.message }
+    }
 }
 
 export async function logMoodEntry(formData: {
@@ -12,11 +19,26 @@ export async function logMoodEntry(formData: {
     notes: string
     custom_metrics: any[]
 }) {
-    console.warn("logMoodEntry: Backend is being migrated. Action ignored.");
-    return { success: true }
+    try {
+        // Map 'notes' to 'note' as expected by backend/schema
+        const { notes, ...rest } = formData
+        await moodsApi.create({
+            note: notes,
+            ...rest
+        })
+        return { success: true }
+    } catch (e: any) {
+        console.error("logMoodEntry Error:", e)
+        return { success: false, error: e.message }
+    }
 }
 
 export async function deleteAllMoodEntries() {
-    console.warn("deleteAllMoodEntries: Backend is being migrated. Action ignored.");
-    return { success: true }
+    try {
+        await moodsApi.deleteAll()
+        return { success: true }
+    } catch (e: any) {
+        console.error("deleteAllMoodEntries Error:", e)
+        return { success: false, error: e.message }
+    }
 }
