@@ -7,11 +7,7 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "test:db": "tsx scripts/test-database.ts",
-    "test:integration": "tsx scripts/test-full-integration.ts",
-    "test:all": "pnpm test:db && pnpm test:integration",
-    "check:env": "tsx scripts/check-env.ts",
-    "vercel-build": "pnpm test:all && pnpm run build"
+    "vercel-build": "pnpm run build"
   },
   "dependencies": {
     "@editorjs/checklist": "1.6.0",
@@ -21,7 +17,6 @@
     "@editorjs/list": "2.0.9",
     "@editorjs/paragraph": "2.11.7",
     "@hookform/resolvers": "^3.10.0",
-    "@neondatabase/serverless": "^1.0.2",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
