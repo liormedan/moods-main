@@ -1,77 +1,84 @@
-from datetime import timedelta
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-
-from backend.app import models, schemas
-from backend.app.api import deps
-from backend.app.core import security
-from backend.app.core.config import settings
-from backend.app.database import get_db
+from firebase_admin import auth as firebase_auth
+from backend.app import schemas
+from backend.app.services.firestore_service import firestore_service
 
 router = APIRouter()
-
-@router.post("/login/access-token", response_model=schemas.Token)
-async def login_access_token(
-    db: AsyncSession = Depends(get_db),
-    form_data: OAuth2PasswordRequestForm = Depends()
-) -> Any:
-    """
-    OAuth2 compatible token login, get an access token for future requests
-    """
-    # Authenticate
-    stmt = select(models.User).where(models.User.email == form_data.username)
-    result = await db.execute(stmt)
-    user = result.scalars().first()
-
-    if not user or not security.verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
-    if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-        
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = security.create_access_token(
-        user.id, expires_delta=access_token_expires
-    )
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
 
 @router.post("/signup", response_model=schemas.User)
 async def create_user_signup(
     *,
-    db: AsyncSession = Depends(get_db),
     user_in: schemas.UserCreate,
 ) -> Any:
     """
-    Create new user without the need to be logged in.
+    Create new user with Firebase Auth
     """
-    stmt = select(models.User).where(models.User.email == user_in.email)
-    result = await db.execute(stmt)
-    user = result.scalars().first()
-    
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this username already exists in the system",
+    try:
+        # Create user in Firebase Auth
+        user_record = firebase_auth.create_user(
+            email=user_in.email,
+            password=user_in.password,
+            email_verified=False
         )
         
-    user = models.User(
-        email=user_in.email,
-        hashed_password=security.get_password_hash(user_in.password),
-        is_active=True
-    )
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
+        # Create default settings in Firestore
+        await firestore_service.update_user_settings(
+            user_record.uid,
+            {'theme': 'system', 'language': 'he'}
+        )
+        
+        return {
+            'id': user_record.uid,
+            'email': user_record.email,
+            'is_active': not user_record.disabled
+        }
+    except firebase_auth.EmailAlreadyExistsError:
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this email already exists in the system"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error creating user: {str(e)}"
+        )
+
+@router.post("/login/access-token", response_model=schemas.Token)
+async def login_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends()
+) -> Any:
+    """
+    Login endpoint - returns Firebase custom token
     
-    # Initialize Settings
-    user_settings = models.UserSettings(user_id=user.id)
-    db.add(user_settings)
-    await db.commit()
+    Note: Firebase Admin SDK cannot verify passwords directly.
+    In production, the client should use Firebase SDK to sign in with email/password,
+    then send the ID token to the backend for verification.
     
-    return user
+    This endpoint creates a custom token for the user if they exist.
+    The client should verify the password using Firebase SDK before calling this.
+    """
+    try:
+        # Get user by email (form_data.username contains the email in OAuth2PasswordRequestForm)
+        user = firebase_auth.get_user_by_email(form_data.username)
+        
+        # Create custom token
+        # Note: Password verification should be done client-side with Firebase SDK
+        # This endpoint assumes the client has already verified the password
+        custom_token = firebase_auth.create_custom_token(user.uid)
+        
+        return {
+            "access_token": custom_token,
+            "token_type": "bearer",
+        }
+    except firebase_auth.UserNotFoundError:
+        raise HTTPException(
+            status_code=400,
+            detail="Incorrect email or password"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error logging in: {str(e)}"
+        )

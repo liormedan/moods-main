@@ -1,6 +1,6 @@
 'use server'
 
-import { moodsApi } from "@/lib/api/moods"
+import { moodsApi } from "@/lib/api/moods-server"
 
 export async function getMoodEntries() {
     try {

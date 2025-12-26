@@ -1,0 +1,51 @@
+# Python Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Python Compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Python Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# Environment variables
+.env
+.env.local
+.env*.local
+*.env
+
+# Firebase Service Account Keys
+service-account-key.json
+*-service-account*.json
+*-firebase-adminsdk-*.json
+moods-firebase-*.json
+*.json
+!requirements.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.cache

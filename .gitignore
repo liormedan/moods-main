@@ -2,6 +2,11 @@
 
 # dependencies
 /node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
 
 # next.js
 /.next/
@@ -9,6 +14,11 @@
 
 # production
 /build
+/dist
+
+# misc
+.DS_Store
+*.pem
 
 # debug
 npm-debug.log*
@@ -16,8 +26,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
-.env*
+# local env files
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -26,7 +40,73 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# clerk configuration (can include secrets)
+# Python - Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+backend/venv/
+backend/env/
+backend/ENV/
+backend/.venv/
+
+# Python - Compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Python - Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# Python - Environment variables
+backend/.env
+backend/.env.local
+backend/.env*.local
+
+# Firebase - Service Account Keys
+service-account-key.json
+*-service-account*.json
+backend/service-account-key.json
+backend/*-service-account*.json
+*.json
+!package.json
+!package-lock.json
+!pnpm-lock.yaml
+!tsconfig.json
+!components.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.cache
+
+# Clerk configuration (can include secrets)
 /.clerk/
 
 # secrets folder (Google OAuth credentials, etc.)

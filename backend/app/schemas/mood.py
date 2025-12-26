@@ -1,4 +1,4 @@
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel
 from typing import Optional, Any, Dict, List
 from datetime import datetime
 
@@ -16,9 +16,9 @@ class MoodUpdate(MoodBase):
     pass
 
 class MoodInDBBase(MoodBase):
-    id: UUID4
-    user_id: UUID4
-    created_at: datetime
+    id: str  # Changed from UUID4 to str for Firestore document ID
+    user_id: str  # Changed from UUID4 to str for Firebase UID
+    created_at: datetime | str  # Can be datetime or ISO string from Firestore
 
     class Config:
         from_attributes = True

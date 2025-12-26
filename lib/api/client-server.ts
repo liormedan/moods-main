@@ -1,19 +1,17 @@
+import 'server-only'
+import { cookies } from 'next/headers'
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"
 
-// Client-side API request function (for use in client components)
-export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+// Server-side API request function (for Server Actions)
+export async function serverApiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     let token: string | undefined | null = null
 
-    // Client-side only - get token from localStorage or cookie
-    if (typeof window !== 'undefined') {
-        // Try to get token from localStorage first (more reliable)
-        token = localStorage.getItem('access_token')
-        
-        // Fallback to cookie if localStorage doesn't have it
-        if (!token) {
-            const match = document.cookie.match(new RegExp('(^| )access_token=([^;]+)'))
-            if (match) token = match[2]
-        }
+    try {
+        const cookieStore = cookies()
+        token = cookieStore.get('access_token')?.value
+    } catch (e) {
+        // Ignored: likely called outside of request context or during build
     }
 
     const headers: HeadersInit = {
@@ -25,7 +23,6 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
     const res = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers,
-        credentials: 'include', // Include cookies in request
     })
 
     if (!res.ok) {
@@ -37,3 +34,4 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
 
     return res.json()
 }
+

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, UUID4, EmailStr
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 
@@ -12,9 +12,9 @@ class EmergencyContactCreate(EmergencyContactBase):
     pass
 
 class EmergencyContact(EmergencyContactBase):
-    id: UUID4
-    user_id: UUID4
-    created_at: datetime
+    id: str  # Changed from UUID4 to str for Firestore document ID
+    user_id: str  # Changed from UUID4 to str for Firebase UID
+    created_at: datetime | str  # Can be datetime or ISO string from Firestore
     
     class Config:
         from_attributes = True
@@ -29,8 +29,8 @@ class TherapistInfoCreate(TherapistInfoBase):
     pass
 
 class TherapistInfo(TherapistInfoBase):
-    user_id: UUID4
-    updated_at: datetime
+    user_id: str  # Changed from UUID4 to str for Firebase UID
+    updated_at: datetime | str  # Can be datetime or ISO string from Firestore
     
     class Config:
         from_attributes = True
@@ -44,9 +44,9 @@ class TherapistTaskCreate(TherapistTaskBase):
     pass
 
 class TherapistTask(TherapistTaskBase):
-    id: UUID4
-    user_id: UUID4
-    created_at: datetime
+    id: str  # Changed from UUID4 to str for Firestore document ID
+    user_id: str  # Changed from UUID4 to str for Firebase UID
+    created_at: datetime | str  # Can be datetime or ISO string from Firestore
 
     class Config:
         from_attributes = True
@@ -54,15 +54,16 @@ class TherapistTask(TherapistTaskBase):
 # --- Appointment ---
 class AppointmentBase(BaseModel):
     title: str
-    date: datetime
+    date: datetime | str  # Can be datetime or ISO string from Firestore
     notes: Optional[str] = None
 
 class AppointmentCreate(AppointmentBase):
     pass
 
 class Appointment(AppointmentBase):
-    id: UUID4
-    user_id: UUID4
+    id: str  # Changed from UUID4 to str for Firestore document ID
+    user_id: str  # Changed from UUID4 to str for Firebase UID
+    created_at: Optional[datetime | str] = None  # Can be datetime or ISO string from Firestore
 
     class Config:
         from_attributes = True

@@ -1,3 +1,4 @@
+from fastapi import APIRouter
 from backend.app.api.endpoints import auth, moods, users, appointments
 
 api_router = APIRouter()

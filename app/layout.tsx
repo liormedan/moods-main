@@ -57,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="he" dir="rtl" data-scroll-behavior="smooth">
       <body className={`${heebo.variable} font-sans antialiased`}>
         {children}
         {process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_VERCEL_ENV && (

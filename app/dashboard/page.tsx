@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { MoodTrackerForm } from "@/components/mood-tracker-form"
@@ -17,10 +17,40 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
   const [isMoodDialogOpen, setIsMoodDialogOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const router = useRouter()
 
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('access_token') || 
+                  document.cookie.match(new RegExp('(^| )access_token=([^;]+)'))?.[2]
+    
+    if (!token) {
+      // User is not authenticated, redirect to login
+      router.push("/login")
+      return
+    }
+    
+    setIsCheckingAuth(false)
+  }, [router])
+
   const handleSignOut = async () => {
-    router.push("/")
+    // Clear authentication
+    localStorage.removeItem('access_token')
+    document.cookie = 'access_token=; path=/; max-age=0'
+    router.push("/login")
+  }
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-sm text-muted-foreground">טוען...</p>
+        </div>
+      </div>
+    )
   }
 
   const sidebarItems = [

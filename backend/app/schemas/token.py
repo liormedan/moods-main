@@ -6,4 +6,5 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
+    sub: Optional[str] = None  # Subject (user ID)
     email: Optional[str] = None

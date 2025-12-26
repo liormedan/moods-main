@@ -1,11 +1,12 @@
-fastapi==0.109.2
-uvicorn[standard]==0.27.1
-sqlalchemy==2.0.27
-alembic==1.13.1
-asyncpg==0.29.0
-pydantic==2.6.1
-pydantic-settings==2.2.1
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
-email-validator==2.1.0.post1
+fastapi>=0.127.0
+uvicorn[standard]>=0.40.0
+firebase-admin>=7.1.0
+pydantic>=2.12.0
+pydantic-settings>=2.12.0
+python-multipart>=0.0.21
+email-validator>=2.3.0
+# Temporary: SQLAlchemy for development (will be removed when moving to Firebase)
+sqlalchemy>=2.0.0
+aiosqlite>=0.19.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4

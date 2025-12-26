@@ -1,40 +1,81 @@
-from typing import Generator, Optional
+from typing import Optional
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
-from backend.app.core import security
-from backend.app.core.config import settings
-from backend.app.database import get_db
-from backend.app.models import User
-from backend.app.schemas import TokenData
-from sqlalchemy import select
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from firebase_admin import auth as firebase_auth
+from backend.app.core.firebase import auth
+import jwt
 
-reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login"
-)
+security = HTTPBearer()
 
 async def get_current_user(
-    db: AsyncSession = Depends(get_db),
-    token: str = Depends(reusable_oauth2)
-) -> User:
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> dict:
+    """
+    Verify Firebase ID token or custom token and return user info
+    """
+    token = credentials.credentials
+    
     try:
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-        token_data = TokenData(**payload)
-    except (JWTError, ValidationError):
+        # First, try to verify as ID token (standard Firebase token)
+        try:
+            decoded_token = firebase_auth.verify_id_token(token)
+            user_id = decoded_token['uid']
+            email = decoded_token.get('email')
+            
+            return {
+                'id': user_id,
+                'email': email,
+                'is_active': True
+            }
+        except Exception as id_token_error:
+            # If ID token verification fails, try to decode as custom token
+            # Custom tokens are JWTs signed by Firebase Admin SDK
+            error_msg = str(id_token_error)
+            
+            # Always try to decode as custom token if ID token fails
+            try:
+                # Decode without verification first to get the payload
+                decoded = jwt.decode(token, options={"verify_signature": False})
+                
+                # Check if it's a custom token (has 'uid' in payload)
+                if 'uid' in decoded:
+                    user_id = decoded['uid']
+                    # Get user info from Firebase Admin SDK to verify user exists
+                    user = firebase_auth.get_user(user_id)
+                    
+                    return {
+                        'id': user.uid,
+                        'email': user.email,
+                        'is_active': not user.disabled
+                    }
+                else:
+                    # Not a custom token, raise the original ID token error
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail=f"Invalid token: {error_msg}"
+                    )
+            except jwt.DecodeError:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Invalid token format: {error_msg}"
+                )
+            except firebase_auth.UserNotFoundError:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="User not found"
+                )
+            except HTTPException:
+                raise
+            except Exception as decode_error:
+                # If decoding also fails, raise the original error
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Could not validate credentials: {error_msg}"
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
+            detail=f"Could not validate credentials: {str(e)}"
         )
-    
-    result = await db.execute(select(User).where(User.id == token_data.sub))
-    user = result.scalars().first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return user

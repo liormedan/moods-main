@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, UUID4
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 # Shared properties
@@ -12,8 +12,12 @@ class UserCreate(UserBase):
 class UserUpdate(UserBase):
     password: Optional[str] = None
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 class UserInDBBase(UserBase):
-    id: UUID4
+    id: str  # Changed from UUID4 to str for Firebase UID
 
     class Config:
         from_attributes = True

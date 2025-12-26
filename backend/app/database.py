@@ -4,19 +4,23 @@ from sqlalchemy.orm import DeclarativeBase
 from backend.app.core.config import settings
 
 # Create Async Engine
+# Handle different database URLs
+DATABASE_URL = settings.DATABASE_URL or "sqlite:///./temp.db"
+
 # Convert postgres:// to postgresql+asyncpg:// if needed
-DATABASE_URL = settings.DATABASE_URL
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-elif DATABASE_URL and not DATABASE_URL.startswith("postgresql+asyncpg://"):
-     # Ensure we use the async driver
-     if DATABASE_URL.startswith("postgresql://"):
-         DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+asyncpg://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("sqlite:///"):
+    # SQLite uses aiosqlite for async
+    DATABASE_URL = DATABASE_URL.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
 
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
-    future=True
+    future=True,
+    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 )
 
 # Async Session Factory

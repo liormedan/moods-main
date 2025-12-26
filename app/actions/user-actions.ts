@@ -1,6 +1,6 @@
 'use server'
 
-import { usersApi } from "@/lib/api/users"
+import { usersApi } from "@/lib/api/users-server"
 
 // --- Settings & Profile ---
 
