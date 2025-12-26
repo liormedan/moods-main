@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 import os
+import json
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Moods Enter API"
@@ -28,3 +29,20 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 settings = Settings()
+
+# If running on Google Cloud Run, try to load from Secret Manager
+if os.getenv("K_SERVICE"):  # Cloud Run sets this environment variable
+    try:
+        from google.cloud import secretmanager
+        client = secretmanager.SecretManagerServiceClient()
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+        if project_id:
+            secret_name = f"projects/{project_id}/secrets/firebase-service-account/versions/latest"
+            response = client.access_secret_version(request={"name": secret_name})
+            settings.FIREBASE_SERVICE_ACCOUNT_JSON = response.payload.data.decode("UTF-8")
+            print("Loaded Firebase credentials from Secret Manager")
+    except ImportError:
+        print("google-cloud-secret-manager not installed, skipping Secret Manager")
+    except Exception as e:
+        print(f"Could not load secret from Secret Manager: {e}")
+        print("Falling back to environment variables")

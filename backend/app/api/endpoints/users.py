@@ -21,12 +21,13 @@ async def read_user_settings(
 @router.put("/me/settings", response_model=Dict[str, Any])
 async def update_user_settings(
     *,
-    settings_data: Dict[str, Any],
+    settings_in: schemas.UserSettingsUpdate,
     current_user: dict = Depends(deps.get_current_user)
 ) -> Any:
     """
     Update user settings
     """
+    settings_data = settings_in.model_dump(exclude_unset=True)
     updated_settings = await firestore_service.update_user_settings(
         current_user['id'],
         settings_data

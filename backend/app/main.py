@@ -8,10 +8,12 @@ app = FastAPI(
 )
 
 # CORS
+import os
+frontend_url = os.getenv("FRONTEND_URL", "*")
 origins = [
     "http://localhost:3000",
     "http://localhost:8000",
-    "*" # TODO: Restrict in production
+    frontend_url if frontend_url != "*" else "*"
 ]
 
 app.add_middleware(

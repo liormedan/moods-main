@@ -12,6 +12,14 @@ class UserCreate(UserBase):
 class UserUpdate(UserBase):
     password: Optional[str] = None
 
+class UserSettingsUpdate(BaseModel):
+    theme: Optional[str] = None
+    language: Optional[str] = None
+    notifications: Optional[bool] = None
+    
+    class Config:
+        extra = "allow"
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str

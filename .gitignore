@@ -12,6 +12,10 @@
 /.next/
 /out/
 
+# Temporary scripts (created by start.ps1)
+start-backend.ps1
+start-frontend.ps1
+
 # production
 /build
 /dist
