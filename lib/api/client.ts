@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1"
 
 // Client-side API request function (for use in client components)
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -8,7 +8,7 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
     if (typeof window !== 'undefined') {
         // Try to get token from localStorage first (more reliable)
         token = localStorage.getItem('access_token')
-        
+
         // Fallback to cookie if localStorage doesn't have it
         if (!token) {
             const match = document.cookie.match(new RegExp('(^| )access_token=([^;]+)'))

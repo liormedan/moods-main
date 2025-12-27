@@ -37,17 +37,24 @@ async def get_current_user(
                 # Decode without verification first to get the payload
                 decoded = jwt.decode(token, options={"verify_signature": False})
                 
-                # Check if it's a custom token (has 'uid' in payload)
-                if 'uid' in decoded:
-                    user_id = decoded['uid']
+                # Check if it's a custom token (has 'uid' or 'sub' in payload)
+                user_id = decoded.get('uid') or decoded.get('sub')
+                
+                if user_id:
                     # Get user info from Firebase Admin SDK to verify user exists
-                    user = firebase_auth.get_user(user_id)
-                    
-                    return {
-                        'id': user.uid,
-                        'email': user.email,
-                        'is_active': not user.disabled
-                    }
+                    try:
+                        user = firebase_auth.get_user(user_id)
+                        
+                        return {
+                            'id': user.uid,
+                            'email': user.email,
+                            'is_active': not user.disabled
+                        }
+                    except firebase_auth.UserNotFoundError:
+                         raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="User not found"
+                        )
                 else:
                     # Not a custom token, raise the original ID token error
                     raise HTTPException(

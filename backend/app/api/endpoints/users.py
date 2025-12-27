@@ -16,6 +16,7 @@ async def read_user_settings(
     Get user settings
     """
     settings = await firestore_service.get_user_settings(current_user['id'])
+    settings['email'] = current_user['email']
     return settings
 
 @router.put("/me/settings", response_model=Dict[str, Any])

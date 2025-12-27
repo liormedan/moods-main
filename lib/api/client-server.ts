@@ -1,14 +1,14 @@
 import 'server-only'
 import { cookies } from 'next/headers'
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1"
 
 // Server-side API request function (for Server Actions)
 export async function serverApiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     let token: string | undefined | null = null
 
     try {
-        const cookieStore = cookies()
+        const cookieStore = await cookies()
         token = cookieStore.get('access_token')?.value
     } catch (e) {
         // Ignored: likely called outside of request context or during build

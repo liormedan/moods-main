@@ -18,10 +18,10 @@ def check_response(response, expected_status=200):
             error_detail = response.json()
         except:
             error_detail = response.text
-        print(f"❌ Failed with {response.status_code}")
+        print(f"[ERROR] Failed with {response.status_code}")
         print(f"Detail: {error_detail}")
         sys.exit(1)
-    print("✅ Success")
+    print("[OK] Success")
     return response.json()
 
 def run_flow():
@@ -92,19 +92,19 @@ def run_flow():
     # Verify the created mood is in the list
     found = any(m.get('id') == created_mood.get('id') for m in moods)
     if found:
-        print("✅ Created mood found in list!")
+        print("[OK] Created mood found in list!")
     else:
-        print("❌ Created mood NOT found in list!")
+        print("[ERROR] Created mood NOT found in list!")
         sys.exit(1)
 
 if __name__ == "__main__":
     try:
         run_flow()
-        print("\n🎉 All tests passed successfully!")
+        print("\n[SUCCESS] All tests passed successfully!")
     except requests.exceptions.ConnectionError:
-        print("\n❌ Error: Could not connect to the backend.")
+        print("\n[ERROR] Error: Could not connect to the backend.")
         print("Make sure the backend is running on http://localhost:8000")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
+        print(f"\n[ERROR] Unexpected error: {e}")
         sys.exit(1)

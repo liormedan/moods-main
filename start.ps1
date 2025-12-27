@@ -44,7 +44,7 @@ Write-Host ""
 
 # Start Backend in new window
 $backendScript = @"
-cd `"$scriptDir\backend`"
+cd `"$scriptDir`"
 `$env:Path = `"$scriptDir\backend\venv\Scripts;`$env:Path`"
 & `"$scriptDir\backend\venv\Scripts\python.exe`" -m uvicorn backend.app.main:app --reload --port 8000
 pause
@@ -65,7 +65,7 @@ Write-Host ""
 # Start Frontend in new window
 $frontendScript = @"
 cd `"$scriptDir`"
-npm run dev
+pnpm dev
 pause
 "@
 

@@ -17,9 +17,10 @@ interface UserProfileMenuProps {
   createdAt?: string
   onSignOut: () => void
   onSettingsClick?: () => void
+  compact?: boolean
 }
 
-export function UserProfileMenu({ email, createdAt, onSignOut, onSettingsClick }: UserProfileMenuProps) {
+export function UserProfileMenu({ email, createdAt, onSignOut, onSettingsClick, compact }: UserProfileMenuProps) {
   const username = email.split("@")[0]
   const initials = username.slice(0, 2).toUpperCase()
 
