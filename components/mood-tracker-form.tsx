@@ -228,8 +228,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                   </div>
                   <Slider value={moodLevel} onValueChange={setMoodLevel} min={1} max={10} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>שמח</span>
                     <span>עצוב</span>
+                    <span>שמח</span>
                   </div>
                 </div>
 
@@ -247,8 +247,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>מלא אנרגיה</span>
                     <span>מותש</span>
+                    <span>מלא אנרגיה</span>
                   </div>
                 </div>
 
@@ -266,8 +266,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>מלחיץ</span>
                     <span>רגוע</span>
+                    <span>מלחיץ</span>
                   </div>
                 </div>
 
@@ -299,8 +299,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                       className="w-full"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{slider.highLabel}</span>
                       <span>{slider.lowLabel}</span>
+                      <span>{slider.highLabel}</span>
                     </div>
                   </div>
                 ))}
