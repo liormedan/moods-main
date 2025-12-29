@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth as firebase_auth
-from backend.app.core.firebase import auth
+from app.core.firebase import auth
 import jwt
 
 security = HTTPBearer()

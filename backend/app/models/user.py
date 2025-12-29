@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
-from backend.app.database import Base
+from app.database import Base
 
 class User(Base):
     __tablename__ = "users"

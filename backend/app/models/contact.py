@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
 
-from backend.app.database import Base
+from app.database import Base
 
 class EmergencyContact(Base):
     __tablename__ = "emergency_contacts"

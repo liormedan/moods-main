@@ -1,8 +1,8 @@
 from typing import Any, List, Dict
 from fastapi import APIRouter, Depends, HTTPException
-from backend.app import schemas
-from backend.app.api import deps
-from backend.app.services.firestore_service import firestore_service
+from app import schemas
+from app.api import deps
+from app.services.firestore_service import firestore_service
 
 router = APIRouter()
 

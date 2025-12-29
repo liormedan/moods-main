@@ -1,6 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
-from backend.app.core.config import settings
+from app.core.config import settings
 import os
 
 # Initialize Firebase Admin SDK

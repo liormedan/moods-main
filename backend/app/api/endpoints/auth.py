@@ -2,8 +2,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from firebase_admin import auth as firebase_auth
-from backend.app import schemas
-from backend.app.services.firestore_service import firestore_service
+from app import schemas
+from app.services.firestore_service import firestore_service
 
 router = APIRouter()
 

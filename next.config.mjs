@@ -17,22 +17,21 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   
-  // Force localhost in development
-  ...(process.env.NODE_ENV === 'development' && {
-    // Disable prefetching to prevent production URL issues
-    experimental: {
-      optimizePackageImports: [],
-    },
-  }),
-  
-  // Suppress webpack cache warnings
-  webpack: (config, { isServer }) => {
+  // Webpack configuration
+  webpack: (config, { isServer, dev }) => {
     // Suppress PackFileCacheStrategy warning
     if (!isServer) {
       config.ignoreWarnings = [
         { module: /webpack\.cache\.PackFileCacheStrategy/ },
       ]
     }
+    
+    // Production optimizations for chunk loading
+    if (!isServer && !dev) {
+      // Use contenthash for better caching and stable chunk names
+      config.output.chunkFilename = 'static/chunks/[name].[contenthash].js'
+    }
+    
     return config
   },
 }

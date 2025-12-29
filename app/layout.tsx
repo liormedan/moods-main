@@ -4,6 +4,7 @@ import { Heebo } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
+import { ErrorHandler } from "./error-handler"
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" data-scroll-behavior="smooth">
       <body className={`${heebo.variable} font-sans antialiased`}>
+        <ErrorHandler />
         {children}
         {process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_VERCEL_ENV && (
           <Analytics />

@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from google.cloud.firestore import Client as FirestoreClient
-from backend.app.core.firebase import db
+from app.core.firebase import db
 
 class FirestoreService:
     def __init__(self):
