@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { Plus, X } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
@@ -35,19 +36,20 @@ interface MoodTrackerFormProps {
 }
 
 const PRESET_SLIDERS = [
-  { name: "שינה", lowLabel: "ישentai מצוין", highLabel: "לא ישentai", emoji: "😴" },
-  { name: "תיאבון", lowLabel: "שבע", highLabel: "רעב", emoji: "🍽️" },
-  { name: "ריכוז", lowLabel: "ממוקד", highLabel: "מפוזר", emoji: "🎯" },
-  { name: "חברתי", lowLabel: "חברתי", highLabel: "מבודד", emoji: "👥" },
   { name: "מוטיבציה", lowLabel: "נמוכה", highLabel: "גבוהה", emoji: "🚀" },
   { name: "כאב", lowLabel: "ללא כאב", highLabel: "כאב חזק", emoji: "💊" },
-  { name: "חרדה", lowLabel: "רגוע", highLabel: "חרד", emoji: "😰" },
 ]
 
 export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
   const [moodLevel, setMoodLevel] = useState([5])
   const [energyLevel, setEnergyLevel] = useState([5])
   const [stressLevel, setStressLevel] = useState([5])
+  const [sleepLevel, setSleepLevel] = useState([5]) // 0-10, displayed as 10-value for reverse (0=right/low, 10=left/high)
+  const [appetiteLevel, setAppetiteLevel] = useState([5]) // 1-10, low (right), high (left)
+  const [concentrationLevel, setConcentrationLevel] = useState([5]) // 1-10, low (right), high (left)
+  const [socialLevel, setSocialLevel] = useState([5]) // 1-10, loneliness (right), fullness (left)
+  const [anxietyLevel, setAnxietyLevel] = useState([5]) // 1-10, low (right), high (left)
+  const [medicationTaken, setMedicationTaken] = useState(false) // Yes/No
   const [notes, setNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -143,13 +145,23 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         energy_level: energyLevel[0],
         stress_level: stressLevel[0],
         notes: notes.trim(), // Server action expects string, handle null there or pass empty string
-        custom_metrics: customSliders.map((slider) => ({
-          name: slider.name,
-          value: slider.value,
-          lowLabel: slider.lowLabel,
-          highLabel: slider.highLabel,
-          emoji: slider.emoji,
-        })),
+        custom_metrics: [
+          // Fixed sliders
+          { name: "שינה", value: 10 - sleepLevel[0], lowLabel: "0 שעות", highLabel: "10+ שעות", emoji: "😴" },
+          { name: "תיאבון", value: appetiteLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🍽️" },
+          { name: "ריכוז", value: concentrationLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🎯" },
+          { name: "חברתי", value: socialLevel[0], lowLabel: "הרגשת בדידות", highLabel: "הרגשת מלאות", emoji: "👥" },
+          { name: "חרדה", value: anxietyLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "😰" },
+          { name: "לקיחת תרופות", value: medicationTaken ? 1 : 0, lowLabel: "לא", highLabel: "כן", emoji: "💊" },
+          // Custom sliders
+          ...customSliders.map((slider) => ({
+            name: slider.name,
+            value: slider.value,
+            lowLabel: slider.lowLabel,
+            highLabel: slider.highLabel,
+            emoji: slider.emoji,
+          })),
+        ],
       })
 
       if (!result.success) {
@@ -175,6 +187,12 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         setMoodLevel([5])
         setEnergyLevel([5])
         setStressLevel([5])
+        setSleepLevel([5])
+        setAppetiteLevel([5])
+        setConcentrationLevel([5])
+        setSocialLevel([5])
+        setAnxietyLevel([5])
+        setMedicationTaken(false)
         setNotes("")
         setCustomSliders([])
         onSuccess?.()
@@ -228,8 +246,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                   </div>
                   <Slider value={moodLevel} onValueChange={setMoodLevel} min={1} max={10} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>עצוב</span>
-                    <span>שמח</span>
+                    <span>רע</span>
+                    <span>טוב</span>
                   </div>
                 </div>
 
@@ -247,8 +265,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>מותש</span>
-                    <span>מלא אנרגיה</span>
+                    <span>נמוכה</span>
+                    <span>גבוהה</span>
                   </div>
                 </div>
 
@@ -266,8 +284,95 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>רגוע</span>
-                    <span>מלחיץ</span>
+                    <span>נמוכה</span>
+                    <span>גבוהה</span>
+                  </div>
+                </div>
+
+                {/* שינה - 0-10, 0 מימין (הכי נמוך), 10 משמאל (הכי גבוה) - הפוך את הערך */}
+                <div className="space-y-1 md:space-y-1.5 border-t pt-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">שינה 😴</Label>
+                    <span className="text-lg md:text-xl font-bold">{10 - sleepLevel[0]}/10</span>
+                  </div>
+                  <Slider 
+                    value={sleepLevel} 
+                    onValueChange={(val) => setSleepLevel(val)} 
+                    min={0} 
+                    max={10} 
+                    step={1} 
+                    className="w-full" 
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>10+ שעות</span>
+                    <span>0 שעות</span>
+                  </div>
+                </div>
+
+                {/* תיאבון - נמוך מימין, גבוה משמאל */}
+                <div className="space-y-1 md:space-y-1.5 border-t pt-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">תיאבון 🍽️</Label>
+                    <span className="text-lg md:text-xl font-bold">{appetiteLevel[0]}/10</span>
+                  </div>
+                  <Slider value={appetiteLevel} onValueChange={setAppetiteLevel} min={1} max={10} step={1} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>גבוה</span>
+                    <span>נמוך</span>
+                  </div>
+                </div>
+
+                {/* ריכוז - נמוך מימין, גבוה משמאל */}
+                <div className="space-y-1 md:space-y-1.5 border-t pt-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">ריכוז 🎯</Label>
+                    <span className="text-lg md:text-xl font-bold">{concentrationLevel[0]}/10</span>
+                  </div>
+                  <Slider value={concentrationLevel} onValueChange={setConcentrationLevel} min={1} max={10} step={1} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>גבוה</span>
+                    <span>נמוך</span>
+                  </div>
+                </div>
+
+                {/* חברתי - בדידות מימין, מלאות משמאל */}
+                <div className="space-y-1 md:space-y-1.5 border-t pt-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">חברתי 👥</Label>
+                    <span className="text-lg md:text-xl font-bold">{socialLevel[0]}/10</span>
+                  </div>
+                  <Slider value={socialLevel} onValueChange={setSocialLevel} min={1} max={10} step={1} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>הרגשת מלאות</span>
+                    <span>הרגשת בדידות</span>
+                  </div>
+                </div>
+
+                {/* חרדה - נמוך מימין, גבוה משמאל */}
+                <div className="space-y-1 md:space-y-1.5 border-t pt-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <Label className="text-sm md:text-base">חרדה 😰</Label>
+                    <span className="text-lg md:text-xl font-bold">{anxietyLevel[0]}/10</span>
+                  </div>
+                  <Slider value={anxietyLevel} onValueChange={setAnxietyLevel} min={1} max={10} step={1} className="w-full" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>גבוה</span>
+                    <span>נמוך</span>
+                  </div>
+                </div>
+
+                {/* לקיחת תרופות - כן/לא */}
+                <div className="space-y-1 md:space-y-1.5 border-t pt-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="medication" className="text-sm md:text-base">לקיחת תרופות 💊</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{medicationTaken ? "כן" : "לא"}</span>
+                      <Switch
+                        id="medication"
+                        checked={medicationTaken}
+                        onCheckedChange={setMedicationTaken}
+                      />
+                    </div>
                   </div>
                 </div>
 
