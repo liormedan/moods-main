@@ -16,7 +16,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
-  return NextResponse.next()
+  // Create response
+  const response = NextResponse.next()
+
+  // Set headers for Firebase Auth popup compatibility
+  // Cross-Origin-Opener-Policy: same-origin-allow-popups allows Firebase Auth popups to work
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
+  response.headers.set('Cross-Origin-Embedder-Policy', 'unsafe-none')
+
+  return response
 }
 
 export const config = {
