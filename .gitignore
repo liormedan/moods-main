@@ -116,3 +116,7 @@ desktop.ini
 # secrets folder (Google OAuth credentials, etc.)
 /secrets/
 secrets/
+
+# Local documentation folder
+/Docs-Local/
+Docs-Local/
