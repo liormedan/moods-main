@@ -60,8 +60,34 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
   const [newSliderHighLabel, setNewSliderHighLabel] = useState("")
   const [newSliderEmoji, setNewSliderEmoji] = useState("📊")
   const [selectedPreset, setSelectedPreset] = useState<string>("")
+  
+  // Track which additional fields are visible
+  const [visibleAdditionalFields, setVisibleAdditionalFields] = useState<Set<string>>(new Set())
+  const [isAddFieldDialogOpen, setIsAddFieldDialogOpen] = useState(false)
 
   const { toast } = useToast()
+  
+  // Available additional fields
+  const ADDITIONAL_FIELDS = [
+    { id: "sleep", name: "שינה", emoji: "😴" },
+    { id: "appetite", name: "תיאבון", emoji: "🍽️" },
+    { id: "concentration", name: "ריכוז", emoji: "🎯" },
+    { id: "social", name: "חברתי", emoji: "👥" },
+    { id: "anxiety", name: "חרדה", emoji: "😰" },
+    { id: "medication", name: "לקיחת תרופות", emoji: "💊" },
+  ]
+  
+  const toggleAdditionalField = (fieldId: string) => {
+    setVisibleAdditionalFields(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(fieldId)) {
+        newSet.delete(fieldId)
+      } else {
+        newSet.add(fieldId)
+      }
+      return newSet
+    })
+  }
 
   const addCustomSlider = () => {
     if (customSliders.length >= 10) {
@@ -146,13 +172,13 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         stress_level: stressLevel[0],
         notes: notes.trim(), // Server action expects string, handle null there or pass empty string
         custom_metrics: [
-          // Fixed sliders
-          { name: "שינה", value: 10 - sleepLevel[0], lowLabel: "0 שעות", highLabel: "10+ שעות", emoji: "😴" },
-          { name: "תיאבון", value: appetiteLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🍽️" },
-          { name: "ריכוז", value: concentrationLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🎯" },
-          { name: "חברתי", value: socialLevel[0], lowLabel: "הרגשת בדידות", highLabel: "הרגשת מלאות", emoji: "👥" },
-          { name: "חרדה", value: anxietyLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "😰" },
-          { name: "לקיחת תרופות", value: medicationTaken ? 1 : 0, lowLabel: "לא", highLabel: "כן", emoji: "💊" },
+          // Only include additional fields that are visible
+          ...(visibleAdditionalFields.has("sleep") ? [{ name: "שינה", value: 10 - sleepLevel[0], lowLabel: "0 שעות", highLabel: "10+ שעות", emoji: "😴" }] : []),
+          ...(visibleAdditionalFields.has("appetite") ? [{ name: "תיאבון", value: appetiteLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🍽️" }] : []),
+          ...(visibleAdditionalFields.has("concentration") ? [{ name: "ריכוז", value: concentrationLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🎯" }] : []),
+          ...(visibleAdditionalFields.has("social") ? [{ name: "חברתי", value: socialLevel[0], lowLabel: "הרגשת בדידות", highLabel: "הרגשת מלאות", emoji: "👥" }] : []),
+          ...(visibleAdditionalFields.has("anxiety") ? [{ name: "חרדה", value: anxietyLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "😰" }] : []),
+          ...(visibleAdditionalFields.has("medication") ? [{ name: "לקיחת תרופות", value: medicationTaken ? 1 : 0, lowLabel: "לא", highLabel: "כן", emoji: "💊" }] : []),
           // Custom sliders
           ...customSliders.map((slider) => ({
             name: slider.name,
@@ -195,6 +221,7 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         setMedicationTaken(false)
         setNotes("")
         setCustomSliders([])
+        setVisibleAdditionalFields(new Set())
         onSuccess?.()
       }
     } catch (error) {
@@ -289,11 +316,62 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                   </div>
                 </div>
 
+                {/* Button to add additional fields */}
+                {visibleAdditionalFields.size < ADDITIONAL_FIELDS.length && (
+                  <div className="border-t pt-3">
+                    <Dialog open={isAddFieldDialogOpen} onOpenChange={setIsAddFieldDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" className="w-full bg-transparent text-xs md:text-sm">
+                          <Plus className="ml-2 h-3 w-3 md:h-4 md:w-4" />
+                          הוסף שדות נוספים
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle className="text-center">בחר שדות להוספה</DialogTitle>
+                          <DialogDescription className="text-center">בחר אילו שדות תרצה להוסיף לטופס</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                          {ADDITIONAL_FIELDS.map((field) => (
+                            <div key={field.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{field.emoji}</span>
+                                <Label className="text-sm md:text-base cursor-pointer" onClick={() => toggleAdditionalField(field.id)}>
+                                  {field.name}
+                                </Label>
+                              </div>
+                              <Switch
+                                checked={visibleAdditionalFields.has(field.id)}
+                                onCheckedChange={() => toggleAdditionalField(field.id)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <Button onClick={() => setIsAddFieldDialogOpen(false)} className="w-full mt-4">
+                          סיום
+                        </Button>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                )}
+
                 {/* שינה - 0-10, 0 מימין (הכי נמוך), 10 משמאל (הכי גבוה) - הפוך את הערך */}
+                {visibleAdditionalFields.has("sleep") && (
                 <div className="space-y-1 md:space-y-1.5 border-t pt-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <Label className="text-sm md:text-base">שינה 😴</Label>
-                    <span className="text-lg md:text-xl font-bold">{10 - sleepLevel[0]}/10</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-center gap-2 flex-1">
+                      <Label className="text-sm md:text-base">שינה 😴</Label>
+                      <span className="text-lg md:text-xl font-bold">{10 - sleepLevel[0]}/10</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleAdditionalField("sleep")}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                   <Slider 
                     value={sleepLevel} 
@@ -308,12 +386,25 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>0 שעות</span>
                   </div>
                 </div>
+                )}
 
                 {/* תיאבון - נמוך מימין, גבוה משמאל */}
+                {visibleAdditionalFields.has("appetite") && (
                 <div className="space-y-1 md:space-y-1.5 border-t pt-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <Label className="text-sm md:text-base">תיאבון 🍽️</Label>
-                    <span className="text-lg md:text-xl font-bold">{appetiteLevel[0]}/10</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-center gap-2 flex-1">
+                      <Label className="text-sm md:text-base">תיאבון 🍽️</Label>
+                      <span className="text-lg md:text-xl font-bold">{appetiteLevel[0]}/10</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleAdditionalField("appetite")}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                   <Slider value={appetiteLevel} onValueChange={setAppetiteLevel} min={1} max={10} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -321,12 +412,25 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>נמוך</span>
                   </div>
                 </div>
+                )}
 
                 {/* ריכוז - נמוך מימין, גבוה משמאל */}
+                {visibleAdditionalFields.has("concentration") && (
                 <div className="space-y-1 md:space-y-1.5 border-t pt-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <Label className="text-sm md:text-base">ריכוז 🎯</Label>
-                    <span className="text-lg md:text-xl font-bold">{concentrationLevel[0]}/10</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-center gap-2 flex-1">
+                      <Label className="text-sm md:text-base">ריכוז 🎯</Label>
+                      <span className="text-lg md:text-xl font-bold">{concentrationLevel[0]}/10</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleAdditionalField("concentration")}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                   <Slider value={concentrationLevel} onValueChange={setConcentrationLevel} min={1} max={10} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -334,12 +438,25 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>נמוך</span>
                   </div>
                 </div>
+                )}
 
                 {/* חברתי - בדידות מימין, מלאות משמאל */}
+                {visibleAdditionalFields.has("social") && (
                 <div className="space-y-1 md:space-y-1.5 border-t pt-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <Label className="text-sm md:text-base">חברתי 👥</Label>
-                    <span className="text-lg md:text-xl font-bold">{socialLevel[0]}/10</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-center gap-2 flex-1">
+                      <Label className="text-sm md:text-base">חברתי 👥</Label>
+                      <span className="text-lg md:text-xl font-bold">{socialLevel[0]}/10</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleAdditionalField("social")}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                   <Slider value={socialLevel} onValueChange={setSocialLevel} min={1} max={10} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -347,12 +464,25 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>הרגשת בדידות</span>
                   </div>
                 </div>
+                )}
 
                 {/* חרדה - נמוך מימין, גבוה משמאל */}
+                {visibleAdditionalFields.has("anxiety") && (
                 <div className="space-y-1 md:space-y-1.5 border-t pt-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <Label className="text-sm md:text-base">חרדה 😰</Label>
-                    <span className="text-lg md:text-xl font-bold">{anxietyLevel[0]}/10</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-center gap-2 flex-1">
+                      <Label className="text-sm md:text-base">חרדה 😰</Label>
+                      <span className="text-lg md:text-xl font-bold">{anxietyLevel[0]}/10</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleAdditionalField("anxiety")}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                   <Slider value={anxietyLevel} onValueChange={setAnxietyLevel} min={1} max={10} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -360,8 +490,10 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>נמוך</span>
                   </div>
                 </div>
+                )}
 
                 {/* לקיחת תרופות - כן/לא */}
+                {visibleAdditionalFields.has("medication") && (
                 <div className="space-y-1 md:space-y-1.5 border-t pt-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="medication" className="text-sm md:text-base">לקיחת תרופות 💊</Label>
@@ -372,9 +504,19 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                         checked={medicationTaken}
                         onCheckedChange={setMedicationTaken}
                       />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleAdditionalField("medication")}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
+                )}
 
                 {customSliders.map((slider) => (
                   <div key={slider.id} className="space-y-1 md:space-y-1.5 border-t pt-2">
