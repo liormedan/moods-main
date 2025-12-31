@@ -22,15 +22,18 @@ build/
 .env
 .env.local
 .env*.local
+.env.test
 *.env
 
 # Firebase Service Account Keys
 service-account-key.json
+service-account-test.json
 *-service-account*.json
 *-firebase-adminsdk-*.json
 moods-firebase-*.json
 *.json
 !requirements.txt
+!service-account-test.json.example
 
 # IDE
 .vscode/
