@@ -120,3 +120,4 @@ secrets/
 # Local documentation folder
 /Docs-Local/
 Docs-Local/
+.vercel

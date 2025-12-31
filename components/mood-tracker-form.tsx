@@ -353,9 +353,8 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
   }
 
   return (
-    <div className="flex items-start justify-center w-full px-4 py-4 md:py-6">
-      <div className="w-full max-w-3xl">
-        <Card>
+    <div className="w-full">
+      <Card>
           <CardHeader className="text-center pb-2 md:pb-4">
             <CardTitle className="text-lg md:text-xl">איך אתה מרגיש היום?</CardTitle>
             <CardDescription className="text-xs md:text-sm">עקוב אחר מצב הרוח, האנרגיה והלחץ שלך</CardDescription>
@@ -827,7 +826,6 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
             </form>
           </CardContent>
         </Card>
-      </div>
       
       {/* Note Dialog */}
       <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>

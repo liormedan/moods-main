@@ -181,7 +181,7 @@ export default function DashboardPage() {
               )}
 
               {activeTab === "report" && (
-                <div className="max-w-3xl">
+                <div className="max-w-3xl mx-auto">
                   <MoodTrackerForm />
                 </div>
               )}
