@@ -19,7 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { Plus, X } from "lucide-react"
+import { Plus, X, MessageSquare } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 interface CustomSlider {
@@ -52,6 +52,22 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
   const [medicationTaken, setMedicationTaken] = useState(false) // Yes/No
   const [notes, setNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Notes for each slider
+  const [moodNote, setMoodNote] = useState("")
+  const [energyNote, setEnergyNote] = useState("")
+  const [stressNote, setStressNote] = useState("")
+  const [sleepNote, setSleepNote] = useState("")
+  const [appetiteNote, setAppetiteNote] = useState("")
+  const [concentrationNote, setConcentrationNote] = useState("")
+  const [socialNote, setSocialNote] = useState("")
+  const [anxietyNote, setAnxietyNote] = useState("")
+  const [medicationNote, setMedicationNote] = useState("")
+  
+  // Dialog state for notes
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false)
+  const [currentNoteField, setCurrentNoteField] = useState<string>("")
+  const [currentNoteValue, setCurrentNoteValue] = useState("")
 
   const [customSliders, setCustomSliders] = useState<CustomSlider[]>([])
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -172,13 +188,17 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         stress_level: stressLevel[0],
         notes: notes.trim(), // Server action expects string, handle null there or pass empty string
         custom_metrics: [
+          // Main metrics with notes
+          { name: "מצב רוח", value: moodLevel[0], lowLabel: "רע", highLabel: "טוב", emoji: getMoodEmoji(moodLevel[0]), note: moodNote },
+          { name: "רמת אנרגיה", value: energyLevel[0], lowLabel: "נמוכה", highLabel: "גבוהה", emoji: getEnergyEmoji(energyLevel[0]), note: energyNote },
+          { name: "רמת לחץ", value: stressLevel[0], lowLabel: "נמוכה", highLabel: "גבוהה", emoji: getStressEmoji(stressLevel[0]), note: stressNote },
           // Only include additional fields that are visible
-          ...(visibleAdditionalFields.has("sleep") ? [{ name: "שינה", value: 10 - sleepLevel[0], lowLabel: "0 שעות", highLabel: "10+ שעות", emoji: "😴" }] : []),
-          ...(visibleAdditionalFields.has("appetite") ? [{ name: "תיאבון", value: appetiteLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🍽️" }] : []),
-          ...(visibleAdditionalFields.has("concentration") ? [{ name: "ריכוז", value: concentrationLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🎯" }] : []),
-          ...(visibleAdditionalFields.has("social") ? [{ name: "חברתי", value: socialLevel[0], lowLabel: "הרגשת בדידות", highLabel: "הרגשת מלאות", emoji: "👥" }] : []),
-          ...(visibleAdditionalFields.has("anxiety") ? [{ name: "חרדה", value: anxietyLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "😰" }] : []),
-          ...(visibleAdditionalFields.has("medication") ? [{ name: "לקיחת תרופות", value: medicationTaken ? 1 : 0, lowLabel: "לא", highLabel: "כן", emoji: "💊" }] : []),
+          ...(visibleAdditionalFields.has("sleep") ? [{ name: "שינה", value: 10 - sleepLevel[0], lowLabel: "0 שעות", highLabel: "10+ שעות", emoji: "😴", note: sleepNote }] : []),
+          ...(visibleAdditionalFields.has("appetite") ? [{ name: "תיאבון", value: appetiteLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🍽️", note: appetiteNote }] : []),
+          ...(visibleAdditionalFields.has("concentration") ? [{ name: "ריכוז", value: concentrationLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "🎯", note: concentrationNote }] : []),
+          ...(visibleAdditionalFields.has("social") ? [{ name: "חברתי", value: socialLevel[0], lowLabel: "הרגשת בדידות", highLabel: "הרגשת מלאות", emoji: "👥", note: socialNote }] : []),
+          ...(visibleAdditionalFields.has("anxiety") ? [{ name: "חרדה", value: anxietyLevel[0], lowLabel: "נמוך", highLabel: "גבוה", emoji: "😰", note: anxietyNote }] : []),
+          ...(visibleAdditionalFields.has("medication") ? [{ name: "לקיחת תרופות", value: medicationTaken ? 1 : 0, lowLabel: "לא", highLabel: "כן", emoji: "💊", note: medicationNote }] : []),
           // Custom sliders
           ...customSliders.map((slider) => ({
             name: slider.name,
@@ -222,6 +242,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
         setNotes("")
         setCustomSliders([])
         setVisibleAdditionalFields(new Set())
+        // Reset all notes
+        setMoodNote("")
+        setEnergyNote("")
+        setStressNote("")
+        setSleepNote("")
+        setAppetiteNote("")
+        setConcentrationNote("")
+        setSocialNote("")
+        setAnxietyNote("")
+        setMedicationNote("")
         onSuccess?.()
       }
     } catch (error) {
@@ -255,6 +285,73 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
     return "🤯"
   }
 
+  const getFieldName = (fieldId: string): string => {
+    const fieldNames: Record<string, string> = {
+      mood: "מצב רוח",
+      energy: "רמת אנרגיה",
+      stress: "רמת לחץ",
+      sleep: "שינה",
+      appetite: "תיאבון",
+      concentration: "ריכוז",
+      social: "חברתי",
+      anxiety: "חרדה",
+      medication: "לקיחת תרופות",
+    }
+    return fieldNames[fieldId] || fieldId
+  }
+
+  const openNoteDialog = (fieldId: string) => {
+    setCurrentNoteField(fieldId)
+    // Get the current note value for this field
+    const noteValues: Record<string, string> = {
+      mood: moodNote,
+      energy: energyNote,
+      stress: stressNote,
+      sleep: sleepNote,
+      appetite: appetiteNote,
+      concentration: concentrationNote,
+      social: socialNote,
+      anxiety: anxietyNote,
+      medication: medicationNote,
+    }
+    setCurrentNoteValue(noteValues[fieldId] || "")
+    setNoteDialogOpen(true)
+  }
+
+  const saveNote = () => {
+    // Save the note to the appropriate state
+    switch (currentNoteField) {
+      case "mood":
+        setMoodNote(currentNoteValue)
+        break
+      case "energy":
+        setEnergyNote(currentNoteValue)
+        break
+      case "stress":
+        setStressNote(currentNoteValue)
+        break
+      case "sleep":
+        setSleepNote(currentNoteValue)
+        break
+      case "appetite":
+        setAppetiteNote(currentNoteValue)
+        break
+      case "concentration":
+        setConcentrationNote(currentNoteValue)
+        break
+      case "social":
+        setSocialNote(currentNoteValue)
+        break
+      case "anxiety":
+        setAnxietyNote(currentNoteValue)
+        break
+      case "medication":
+        setMedicationNote(currentNoteValue)
+        break
+    }
+    setNoteDialogOpen(false)
+  }
+
   return (
     <div className="flex items-start justify-center w-full px-4 py-4 md:py-6">
       <div className="w-full max-w-3xl">
@@ -276,6 +373,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>רע</span>
                     <span>טוב</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNoteDialog("mood")}
+                    className="w-full text-xs h-8"
+                  >
+                    <MessageSquare className="ml-2 h-3 w-3" />
+                    {moodNote ? "ערוך הערה" : "הוסף הערה"}
+                  </Button>
                 </div>
 
                 <div className="space-y-1 md:space-y-1.5">
@@ -295,6 +402,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>נמוכה</span>
                     <span>גבוהה</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNoteDialog("energy")}
+                    className="w-full text-xs h-8"
+                  >
+                    <MessageSquare className="ml-2 h-3 w-3" />
+                    {energyNote ? "ערוך הערה" : "הוסף הערה"}
+                  </Button>
                 </div>
 
                 <div className="space-y-1 md:space-y-1.5">
@@ -314,6 +431,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>נמוכה</span>
                     <span>גבוהה</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNoteDialog("stress")}
+                    className="w-full text-xs h-8"
+                  >
+                    <MessageSquare className="ml-2 h-3 w-3" />
+                    {stressNote ? "ערוך הערה" : "הוסף הערה"}
+                  </Button>
                 </div>
 
                 {/* Button to add additional fields */}
@@ -411,6 +538,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>גבוה</span>
                     <span>נמוך</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNoteDialog("appetite")}
+                    className="w-full text-xs h-8"
+                  >
+                    <MessageSquare className="ml-2 h-3 w-3" />
+                    {appetiteNote ? "ערוך הערה" : "הוסף הערה"}
+                  </Button>
                 </div>
                 )}
 
@@ -437,6 +574,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>גבוה</span>
                     <span>נמוך</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNoteDialog("concentration")}
+                    className="w-full text-xs h-8"
+                  >
+                    <MessageSquare className="ml-2 h-3 w-3" />
+                    {concentrationNote ? "ערוך הערה" : "הוסף הערה"}
+                  </Button>
                 </div>
                 )}
 
@@ -463,6 +610,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>הרגשת מלאות</span>
                     <span>הרגשת בדידות</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNoteDialog("social")}
+                    className="w-full text-xs h-8"
+                  >
+                    <MessageSquare className="ml-2 h-3 w-3" />
+                    {socialNote ? "ערוך הערה" : "הוסף הערה"}
+                  </Button>
                 </div>
                 )}
 
@@ -489,6 +646,16 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
                     <span>גבוה</span>
                     <span>נמוך</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNoteDialog("anxiety")}
+                    className="w-full text-xs h-8"
+                  >
+                    <MessageSquare className="ml-2 h-3 w-3" />
+                    {anxietyNote ? "ערוך הערה" : "הוסף הערה"}
+                  </Button>
                 </div>
                 )}
 
@@ -661,6 +828,32 @@ export function MoodTrackerForm({ onSuccess }: MoodTrackerFormProps = {}) {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Note Dialog */}
+      <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>הערה עבור {getFieldName(currentNoteField)}</DialogTitle>
+            <DialogDescription>הוסף הערה ספציפית למדד זה (אופציונלי)</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              value={currentNoteValue}
+              onChange={(e) => setCurrentNoteValue(e.target.value)}
+              placeholder="רשום הערה..."
+              className="min-h-[100px]"
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setNoteDialogOpen(false)}>
+                ביטול
+              </Button>
+              <Button onClick={saveNote}>
+                שמור
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

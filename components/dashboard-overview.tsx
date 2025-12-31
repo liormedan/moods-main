@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { getMoodEntries } from "@/app/actions/mood-actions"
-import { ArrowLeft, TrendingUp, TrendingDown, Clock, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
+import { ArrowLeft, TrendingUp, TrendingDown, Cloud, CloudRain, CloudSnow, Sun } from "lucide-react"
 
 interface MoodEntry {
   id: string
@@ -309,22 +309,10 @@ export function DashboardOverview({ userEmail, userId, onNavigateToReport }: Das
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+      <div className="flex justify-center">
+        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20 max-w-md w-full">
           <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              <CardTitle className="text-sm">זמן אידיאלי</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-bold">{enhancedStats.bestReportingTime}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">פעולה מהירה</CardTitle>
+            <CardTitle className="text-sm text-center">פעולה מהירה</CardTitle>
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={onNavigateToReport}>

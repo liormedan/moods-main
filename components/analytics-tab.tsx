@@ -58,14 +58,35 @@ export function AnalyticsTab() {
       } else {
         const data = res.data || []
         // Map DB 'note' to UI 'notes'
-        const mappedData = data.map((e: any) => ({
-          ...e,
-          notes: e.note || e.notes || "",
-          // Ensure numbers are numbers
-          mood_level: Number(e.mood_level),
-          energy_level: Number(e.energy_level),
-          stress_level: Number(e.stress_level)
-        }))
+        const mappedData = data.map((e: any) => {
+          // Parse custom_metrics if it's a string
+          let customMetrics = e.custom_metrics
+          if (typeof customMetrics === "string") {
+            try {
+              customMetrics = JSON.parse(customMetrics)
+            } catch (err) {
+              console.error("Failed to parse custom_metrics:", err)
+              customMetrics = []
+            }
+          }
+          // Ensure custom_metrics values are numbers
+          if (Array.isArray(customMetrics)) {
+            customMetrics = customMetrics.map((metric: any) => ({
+              ...metric,
+              value: typeof metric.value === "number" ? metric.value : Number(metric.value) || 0
+            }))
+          }
+          
+          return {
+            ...e,
+            notes: e.note || e.notes || "",
+            // Ensure numbers are numbers
+            mood_level: Number(e.mood_level),
+            energy_level: Number(e.energy_level),
+            stress_level: Number(e.stress_level),
+            custom_metrics: customMetrics
+          }
+        })
         setEntries(mappedData)
         extractCustomMetrics(mappedData)
       }
@@ -136,12 +157,28 @@ export function AnalyticsTab() {
         const overall = Math.round(((entry.mood_level + entry.energy_level + entry.stress_level) / 3) * 10) / 10
 
         const customData: any = {}
-        if (entry.custom_metrics && Array.isArray(entry.custom_metrics)) {
-          entry.custom_metrics.forEach((metric: any) => {
-            if (metric.name && metric.value) {
-              customData[metric.name] = metric.value
+        if (entry.custom_metrics) {
+          let metrics = entry.custom_metrics
+          // Handle string JSON
+          if (typeof metrics === "string") {
+            try {
+              metrics = JSON.parse(metrics)
+            } catch (e) {
+              console.error("Failed to parse custom_metrics:", e)
+              metrics = []
             }
-          })
+          }
+          if (Array.isArray(metrics)) {
+            metrics.forEach((metric: any) => {
+              if (metric.name && (metric.value !== undefined && metric.value !== null)) {
+                // Ensure value is a number
+                const numValue = typeof metric.value === "number" ? metric.value : Number(metric.value)
+                if (!isNaN(numValue)) {
+                  customData[metric.name] = numValue
+                }
+              }
+            })
+          }
         }
 
         return {
@@ -920,45 +957,141 @@ export function AnalyticsTab() {
                           </AccordionTrigger>
                           <AccordionContent>
                             <div className="space-y-4 pt-4">
-                              {/* Main Metrics */}
-                              <div className="grid grid-cols-3 gap-4">
-                                <div className="text-center p-3 rounded-lg bg-cyan-50 dark:bg-cyan-950">
-                                  <div className="text-2xl mb-1">😊</div>
-                                  <div className="text-sm text-muted-foreground">מצב רוח</div>
-                                  <div className="text-xl font-bold text-cyan-600 dark:text-cyan-400">
-                                    {entry.mood_level}/10
-                                  </div>
-                                </div>
-                                <div className="text-center p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950">
-                                  <div className="text-2xl mb-1">⚡</div>
-                                  <div className="text-sm text-muted-foreground">אנרגיה</div>
-                                  <div className="text-xl font-bold text-yellow-600 dark:text-yellow-400">
-                                    {entry.energy_level}/10
-                                  </div>
-                                </div>
-                                <div className="text-center p-3 rounded-lg bg-red-50 dark:bg-red-950">
-                                  <div className="text-2xl mb-1">😰</div>
-                                  <div className="text-sm text-muted-foreground">לחץ</div>
-                                  <div className="text-xl font-bold text-red-600 dark:text-red-400">
-                                    {entry.stress_level}/10
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Custom Metrics */}
-                              {customMetrics.length > 0 && (
-                                <div className="space-y-2">
-                                  <h4 className="text-sm font-semibold text-center">מדדים נוספים</h4>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {customMetrics.map((metric: any, idx: number) => (
-                                      <div key={idx} className="text-center p-2 rounded-lg bg-muted/50">
-                                        <div className="text-sm text-muted-foreground">{metric.name}</div>
-                                        <div className="text-lg font-semibold">{metric.value}/10</div>
+                              {/* Main Metrics - 5 קבועים */}
+                              {(() => {
+                                const moodMetric = customMetrics.find((m: any) => m.name === "מצב רוח")
+                                const energyMetric = customMetrics.find((m: any) => m.name === "רמת אנרגיה")
+                                const stressMetric = customMetrics.find((m: any) => m.name === "רמת לחץ")
+                                
+                                return (
+                                  <div className="grid grid-cols-3 gap-4">
+                                    <div className="text-center p-3 rounded-lg bg-cyan-50 dark:bg-cyan-950">
+                                      <div className="text-2xl mb-1">😊</div>
+                                      <div className="text-sm text-muted-foreground">מצב רוח</div>
+                                      <div className="text-xl font-bold text-cyan-600 dark:text-cyan-400">
+                                        {entry.mood_level}/10
                                       </div>
-                                    ))}
+                                      {moodMetric?.note && (
+                                        <div className="text-xs text-muted-foreground mt-1 italic">
+                                          {moodMetric.note}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950">
+                                      <div className="text-2xl mb-1">⚡</div>
+                                      <div className="text-sm text-muted-foreground">אנרגיה</div>
+                                      <div className="text-xl font-bold text-yellow-600 dark:text-yellow-400">
+                                        {entry.energy_level}/10
+                                      </div>
+                                      {energyMetric?.note && (
+                                        <div className="text-xs text-muted-foreground mt-1 italic">
+                                          {energyMetric.note}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-red-50 dark:bg-red-950">
+                                      <div className="text-2xl mb-1">😰</div>
+                                      <div className="text-sm text-muted-foreground">לחץ</div>
+                                      <div className="text-xl font-bold text-red-600 dark:text-red-400">
+                                        {entry.stress_level}/10
+                                      </div>
+                                      {stressMetric?.note && (
+                                        <div className="text-xs text-muted-foreground mt-1 italic">
+                                          {stressMetric.note}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )
+                              })()}
+
+                              {/* 5 המדדים הקבועים - שינה ותיאבון */}
+                              {(() => {
+                                const sleepMetric = customMetrics.find((m: any) => m.name === "שינה")
+                                const appetiteMetric = customMetrics.find((m: any) => m.name === "תיאבון")
+                                const hasSleepOrAppetite = sleepMetric || appetiteMetric
+                                
+                                if (hasSleepOrAppetite) {
+                                  return (
+                                    <div className="grid grid-cols-2 gap-4">
+                                      {sleepMetric && (
+                                        <div className="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-950">
+                                          <div className="text-2xl mb-1">😴</div>
+                                          <div className="text-sm text-muted-foreground">שינה</div>
+                                          <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                            {sleepMetric.value}/10
+                                          </div>
+                                          {sleepMetric.note && (
+                                            <div className="text-xs text-muted-foreground mt-1 italic">
+                                              {sleepMetric.note}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                      {appetiteMetric && (
+                                        <div className="text-center p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
+                                          <div className="text-2xl mb-1">🍽️</div>
+                                          <div className="text-sm text-muted-foreground">תיאבון</div>
+                                          <div className="text-xl font-bold text-orange-600 dark:text-orange-400">
+                                            {appetiteMetric.value}/10
+                                          </div>
+                                          {appetiteMetric.note && (
+                                            <div className="text-xs text-muted-foreground mt-1 italic">
+                                              {appetiteMetric.note}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )
+                                }
+                                return null
+                              })()}
+
+                              {/* מדדים נוספים באקורדיאון */}
+                              {(() => {
+                                // המדדים הקבועים שאנחנו מציגים תמיד
+                                const fixedMetricNames = ["מצב רוח", "רמת אנרגיה", "רמת לחץ", "שינה", "תיאבון"]
+                                // כל המדדים הנוספים
+                                const additionalMetrics = customMetrics.filter(
+                                  (m: any) => !fixedMetricNames.includes(m.name)
+                                )
+
+                                if (additionalMetrics.length > 0) {
+                                  return (
+                                    <Accordion type="single" collapsible className="w-full">
+                                      <AccordionItem value={`additional-${entry.id}-${index}`} className="border rounded-lg">
+                                        <AccordionTrigger className="hover:no-underline px-4">
+                                          <div className="flex items-center justify-center gap-2 w-full">
+                                            <span className="text-sm font-semibold">מדדים נוספים ({additionalMetrics.length})</span>
+                                          </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                          <div className="grid grid-cols-2 gap-2 pt-2 px-4 pb-4">
+                                            {additionalMetrics.map((metric: any, idx: number) => (
+                                              <div key={idx} className="text-center p-2 rounded-lg bg-muted/50">
+                                                <div className="text-lg mb-1">{metric.emoji || "📊"}</div>
+                                                <div className="text-sm text-muted-foreground">{metric.name}</div>
+                                                <div className="text-lg font-semibold">
+                                                  {typeof metric.value === "boolean" 
+                                                    ? (metric.value ? "כן" : "לא")
+                                                    : `${metric.value}/10`}
+                                                </div>
+                                                {metric.note && (
+                                                  <div className="text-xs text-muted-foreground mt-1 italic">
+                                                    {metric.note}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </AccordionContent>
+                                      </AccordionItem>
+                                    </Accordion>
+                                  )
+                                }
+                                return null
+                              })()}
 
                               {/* Notes Section */}
                               {entry.notes && (
