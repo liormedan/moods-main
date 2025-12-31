@@ -22,4 +22,3 @@ def test_health_check_returns_json():
     """Test that /health returns valid JSON"""
     response = client.get("/health")
     assert response.headers["content-type"] == "application/json"
-
